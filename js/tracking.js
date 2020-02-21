@@ -172,6 +172,37 @@ var RevealTracking = window.RevealTracking || (function () {
     });
   }
 
+  function _trackLinks() {
+    let tracksInternalLinks = config.links === true || config.links.internal;
+    let tracksExternalLinks = config.links === true || config.links.external;
+
+    if (tracksInternalLinks || tracksExternalLinks) {
+      document.addEventListener('click', function(event) {
+        if (!event.target.matches(`#${Reveal.getCurrentSlide().id} a`)) return true;
+
+        let isInternalLink = event.target.href.startsWith('#');
+
+        if (isInternalLink) {
+          if (tracksInternalLinks) {
+            let matches = event.target.href.match(/#\/(\d+)\/(\d+)/);
+            _track('externalLink', {
+              link: event.target.href,
+              linkText: event.target.text,
+              chapterLink: _getChapterNumber(matches[1], matches[2]),
+            });
+          }
+        } else {
+          if (tracksExternalLinks) {
+            _track('externalLink', {
+              link: event.target.href,
+              linkText: event.target.text,
+            });
+          }
+        }
+      });
+    }
+  }
+
 
 
   // Helper methods.
