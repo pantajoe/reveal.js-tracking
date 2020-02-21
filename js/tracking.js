@@ -5,32 +5,53 @@
  * Copyright (C) 2020 Joe Pantazidis
  */
 
-var seconds = 0, minutes = 0, hours = 0;
-var Timer = {
-  start: function () {
-    var timer = this;
-    setInterval(() => {
-      timer.incrementSecond();
+class Timer {
+  constructor() {
+    this.hours   = 0;
+    this.minutes = 0;
+    this.seconds = 0;
+  }
+
+  start() {
+    let self = this;
+    this.timer = setInterval(() => {
+      self._incrementSecond();
     }, 1000);
-  },
-  incrementSecond: function () {
-    seconds++;
-    if (seconds >= 60) {
-      seconds = 0;
-      minutes++;
-      if (minutes >= 60) {
-        minutes = 0;
-        hours++;
-      }
+  }
+
+  reset() {
+    this.clear();
+    this.start();
+  }
+
+  clear() {
+    if (this.timer) {
+      clearInterval(this.timer);
     }
-  },
-  toString: function () {
-    var hourString   = (hours   ? (hours > 9   ? hours   : '0' + hours)   : '00');
-    var minuteString = (minutes ? (minutes > 9 ? minutes : '0' + minutes) : '00');
-    var secondString = (seconds > 9 ? seconds : '0' + seconds);
+    this.hours   = 0;
+    this.minutes = 0;
+    this.seconds = 0;
+  }
+
+  toString() {
+    let hourString   = (this.hours   > 9 ? this.hours   : '0' + this.hours);
+    let minuteString = (this.minutes > 9 ? this.minutes : '0' + this.minutes);
+    let secondString = (this.seconds > 9 ? this.seconds : '0' + this.seconds);
 
     return (hourString + ':' + minuteString + ':' + secondString);
-  },
+  }
+
+  _incrementSecond() {
+    this.seconds++;
+    if (this.seconds >= 60) {
+      this.seconds = 0;
+      this.minutes++;
+      if (this.minutes >= 60) {
+        this.minutes = 0;
+        this.hours++;
+      }
+    }
+  }
 };
 
 var RevealTracking = window.RevealTracking || (function () {
