@@ -106,6 +106,8 @@ var RevealTracking = window.RevealTracking || (function () {
   };
 
   var config = {...defaultConfig, ...Reveal.getConfig().tracking};
+  var slideTimer, globalTimer;
+  var postBody = {};
 
   // Validate configuration for tracking plug-in
   if (config.apiConfig.trackingAPI === undefined) {
@@ -139,6 +141,22 @@ var RevealTracking = window.RevealTracking || (function () {
     );
   }
 
+  // Main Logic: public functions
+  function showConsentBanner() {
+    // TODO: Load CSS; show banner at the top
+    // TODO: eventListener onclick = consentVariable
+    // TODO: eventListener onclick 3 retries for Token (generation, validation)
+    // TODO: do not forget the cookie
+  }
+
+  function addEventListeners() {
+    _trackClosing();
+    _trackDwellTimes();
+    _trackLinks();
+    _trackSlideTransitions();
+    _trackMediaActions();
+    _trackQuizzes();
+  }
 
   // Main Logic: helper functions
   function _trackDwellTimes() {
@@ -203,8 +221,36 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  // TODO
+  function _trackMediaActions() {
+    let tracksAudio = config.media === true || config.media.audio;
+    let tracksVideo = config.media === true || config.media.video;
 
+    if (tracksAudio) {
+      document.querySelectorAll('audio').forEach(function(audio) {
+        audio.addEventListener('play', function (event) {
+          
+        });
 
+        audio.addEventListener('pause', function (event) {
+          
+        });
+      });
+    }
+
+    if (tracksVideo) {
+      document.querySelectorAll('video').forEach(function(video) {
+        video.addEventListener('', function (event) {
+
+        });
+      });
+    }
+  }
+  // TODO END
+
+  function _trackQuizzes() {
+    // TODO
+  }
 
   function _trackSlideTransitions() {
     if (config.slideTransitions) {
@@ -329,8 +375,14 @@ var RevealTracking = window.RevealTracking || (function () {
 
   // Return plug-in object
   return {
-    init: function () {
-      Timer.start();
+    init: function() {
+      globalTimer = new Timer();
+      slideTimer  = new Timer();
+      globalTimer.start();
+      slideTimer.start();
+
+      addEventListeners();
+      showConsentBanner();
     },
   }
 })();
