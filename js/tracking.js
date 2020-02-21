@@ -235,8 +235,96 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 
   // Helper methods.
+  function _track(eventType, eventData, options = {}) {
+    let event;
+    if (eventType != 'totalDwellTime') {
+      event = _eventWithSlideMetadata(eventType, eventData, options);
+    }
+
+    switch (eventType) {
+      case 'dwellTimePerSlide':
+        postBody.dwellTimes = postBody.dwellTimes || [];
+        postBody.dwellTimes.push(event);
+        break;
+
+      case 'totalDwellTime':
+        postBody = {
+          ...postBody,
+          ...eventData,
+        }
+        break;
+
+      case 'internalLink', 'externalLink':
+        postBody.links = postBody.links || [];
+        postBody.links.push(event);
+        break;
+
+      case 'slideTransition':
+        postBody.slideTransitions = postBody.slideTransitions || [];
+        postBody.slideTransitions.push(eventData);
+        break;
+    }
+  }
+
+  function _eventWithSlideMetadata(eventType, eventData, options = {}) {
+    let slideIndices = Reveal.getIndices();
+    let event = {
+      type: eventType,
+      eventData: {
+        slideNumber: Reveal.getSlidePastCount(),
+        chapter: _getChapterNumber(slideIndices.h, slideIndices.v),
+        horizontalIndex: slideIndices.h,
+        verticalIndex: slideIndices.v,
+        ...eventData,
+      },
+    };
+
+    if (!options.timestamp && config.timestamps) {
+      event.eventData.timestamp = globalTimer.toString();
+    }
+
+    return event;
+  }
+
+  /**
+   * Transmits a JSON in this format:
+   * 
+   * {
+   *   userToken: string
+   *   totalNumberOfSlides: integer,
+   *   progress: float,
+   *   totalDwellTime: string,
+   *   dwellTimes: Array
+   *   slideTransitions: Array,
+   *   links: Array,
+   *   media: Array,
+   *   quizzes: Array
+   * }
+   */
+  function _sendData() {
+    // TODO: only send if consent given, otherwise display warn message to console.
+    // TODO: use navigator.sendBeacon
+    // TODO: 3 retries if possible
+  }
+
   function _strip(string) {
     return string.trim().replace(/(\s)+/g, ' ').replace(/\n/g, '');
+  }
+
+  function _getChapterNumber(indexh, indexv) {
+    if (indexv > 0) {
+      return `${indexh - 1}`;
+    } else {
+      return `${indexh - 1}.${indexv - 1}`;
+    }
+  }
+
+  function _tracksTotalDwellTime() {
+    return config.dwellTime === true || config.dwellTime.total;
+  }
+
+  function _tracksDwellTimePerSlide() {
+    return config.dwellTime === true || config.dwellTime.perSlide;
   }
 
   // Return plug-in object
