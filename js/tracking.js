@@ -139,7 +139,39 @@ var RevealTracking = window.RevealTracking || (function () {
     );
   }
 
-  // Main Logic
+
+  // Main Logic: helper functions
+  function _trackDwellTimes() {
+    if (_tracksDwellTimePerSlide()) {
+      Reveal.addEventListener('slidechanged', function(event) {
+        _track('dwellTimePerSlide', {
+          dwellTime: slideTimer.toString(),
+        });
+
+        slideTimer.reset();
+      });
+    }
+  }
+
+  function _trackClosing() {
+    window.addEventListener('pagehide', function() {
+      if (_tracksDwellTimePerSlide()) {
+        _track('dwellTimePerSlide', {
+          dwellTime: globalTimer.toString(),
+        });
+      }
+
+      if (_tracksTotalDwellTime()) {
+        _track('totalDwellTime', {
+          dwellTime: globalTimer.toString(),
+          finalProgress: Reveal.getProgress(),
+        });
+      }
+
+      _sendData();
+    });
+  }
+
 
 
   // Helper methods.
