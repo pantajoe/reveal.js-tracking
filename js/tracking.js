@@ -76,7 +76,7 @@ var RevealTracking = window.RevealTracking || (function () {
    *   },
    *   consentButton: {
    *     class: 'consent-banner--button',
-   *     text: 'Okay!',
+   *     text: 'I\'d like that!',
    *   },
    *   infoText: 'This presentation uses pseudonymous tracking for Learning Analytics.',
    *   moreLink: {
@@ -115,7 +115,7 @@ var RevealTracking = window.RevealTracking || (function () {
       },
       consentButton: {
         class: 'consent-banner--button',
-        text: 'Okay!',
+        text: 'I\'d like that!',
       },
       infoText: 'This presentation uses pseudonymous tracking for Learning Analytics.',
       moreLink: {
