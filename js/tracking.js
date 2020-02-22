@@ -293,7 +293,7 @@ var RevealTracking = window.RevealTracking || (function () {
           _track(mediaType, {
             played: true,
           }, {
-            id: this.id.replace(/\-/, '_'),
+            id: this.id,
           });
         });
 
@@ -302,7 +302,7 @@ var RevealTracking = window.RevealTracking || (function () {
             finished: this.ended,
             progress: this.currentTime / this.duration,
           }, {
-            id: this.id.replace(/\-/, '_')
+            id: this.id,
           });
         });
       });
