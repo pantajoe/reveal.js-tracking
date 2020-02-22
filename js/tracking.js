@@ -314,7 +314,7 @@ var RevealTracking = window.RevealTracking || (function () {
   // Helper methods.
   function _track(eventType, eventData, options = {}) {
     let event;
-    if (eventType != 'totalDwellTime') {
+    if (['dwellTimePerSlide', 'internalLink', 'externalLink'].includes(eventType)) {
       event = _eventWithSlideMetadata(eventType, eventData, options);
     }
 
