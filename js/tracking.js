@@ -221,32 +221,47 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
-  // TODO
   function _trackMediaActions() {
     let tracksAudio = config.media === true || config.media.audio;
     let tracksVideo = config.media === true || config.media.video;
 
-    if (tracksAudio) {
-      document.querySelectorAll('audio').forEach(function(audio) {
-        audio.addEventListener('play', function (event) {
-          
+    if (tracksAudio || tracksVideo) {
+      let mediaSelector = function(tracksAudio, tracksVideo) {
+        if (tracksAudio && tracksVideo) {
+          return 'audio, video';
+        } else if(tracksAudio) {
+          return 'audio';
+        } else {
+          return 'video';
+        }
+      }(tracksAudio, tracksVideo);
+
+      document.querySelectorAll(mediaSelector).forEach(function(media) {
+        media.addEventListener('play', function () {
+          let slideIndices = Reveal.getIndices();
+
+          _track(this.tagName.toLowerCase(), {
+            source: this.currentSrc,
+            slideNumber: Reveal.getSlidePastCount(),
+            chapter: _getChapterNumber(slideIndices.h, slideIndices.v),
+            horizontalIndex: slideIndices.h,
+            verticalIndex: slideIndices.v,
+          }, {
+            id: this.id.replace(/\-/, '_'),
+          });
         });
 
-        audio.addEventListener('pause', function (event) {
-          
-        });
-      });
-    }
-
-    if (tracksVideo) {
-      document.querySelectorAll('video').forEach(function(video) {
-        video.addEventListener('', function (event) {
-
+        media.addEventListener('pause', function () {
+          _track(this.tagName.toLowerCase(), {
+            finished: this.ended,
+            progress: this.currentTime / this.duration,
+          }, {
+            id: this.id.replace(/\-/, '_')
+          });
         });
       });
     }
   }
-  // TODO END
 
   function _trackQuizzes() {
     // TODO
@@ -309,6 +324,15 @@ var RevealTracking = window.RevealTracking || (function () {
         postBody.slideTransitions = postBody.slideTransitions || [];
         postBody.slideTransitions.push(eventData);
         break;
+
+      case 'audio', 'video':
+        postBody.media = postBody.media || {}
+        postBody.media[options.id] = postBody.media[options.id] || {};
+        postBody.media[options.id] = {
+          ...postBody.media[options.id],
+          ...eventData,
+        }
+        break;
     }
   }
 
@@ -343,7 +367,7 @@ var RevealTracking = window.RevealTracking || (function () {
    *   dwellTimes: Array
    *   slideTransitions: Array,
    *   links: Array,
-   *   media: Array,
+   *   media: Object,
    *   quizzes: Array
    * }
    */
