@@ -5,6 +5,9 @@
  * Copyright (C) 2020 Joe Pantazidis
  */
 
+/**
+ * A basic Timer class to capture dwell times.
+ */
 class Timer {
   constructor() {
     this.hours   = 0;
@@ -54,6 +57,9 @@ class Timer {
   }
 };
 
+/**
+ * Tracking plug-in for reveal.js
+ */
 var RevealTracking = window.RevealTracking || (function () {
   /**
    * apiConfig: {
@@ -127,13 +133,18 @@ var RevealTracking = window.RevealTracking || (function () {
     },
   };
 
+  // overwrite default config with manual config
   var config = {...defaultConfig, ...Reveal.getConfig().tracking};
+  // define necessary timers
   var slideTimer, globalTimer, quizTimer;
+  // this object is sent to the trackingAPI on window#pagehide
   var postBody = {};
   var consentGiven = false;
   var userToken;
 
-  // Validate configuration for tracking plug-in
+  /** 
+   * Validate API configuration for tracking plug-in.
+   */
   if (config.apiConfig.trackingAPI == undefined) {
     console.error('You have no trackingAPI configured where to send tracking data to!');
     return;
@@ -166,6 +177,13 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 
   // Main Logic: public functions
+
+  /**
+   * Load the user token:
+   * - from cookies
+   * - from HTML local storage
+   * - from authentication API
+   */
   async function loadUserToken() {
     userToken = _getCookie('user_token') || window.localStorage.getItem('user_token');
 
@@ -177,11 +195,15 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  /**
+   * Display consent banner.
+   */
   function showConsentBanner() {
     if (userToken == undefined) {
       _loadStylesheet(document.currentScript.src + '/../../css/tracking.css');
       let cbConfig = config.consentBanner;
 
+      // create consent banner node
       let consentBanner = document.createElement('div');
       consentBanner.classList.add('consent-banner');
       consentBanner.innerHTML = _strip(`
@@ -193,6 +215,7 @@ var RevealTracking = window.RevealTracking || (function () {
         <a class="${cbConfig.closeButton.class}">${cbConfig.closeButton.text}</a>
       `);
 
+      // define event listeners for closing the banner and giving consent
       consentBanner.querySelector(`.${cbConfig.closeButton.class}`).addEventListener('click', function() {
         consentBanner.remove();
         consentGiven = false;
@@ -204,10 +227,14 @@ var RevealTracking = window.RevealTracking || (function () {
         _requestUserToken();
       });
 
+      // add consent banner to DOM
       document.body.prepend(consentBanner);
     }
   }
 
+  /**
+   * Add all event listeners for tracking.
+   */
   function addEventListeners() {
     _trackClosing();
     _trackDwellTimes();
@@ -218,6 +245,10 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 
   // Consent Banner: helper functions
+
+  /**
+   * Load consent banner stylesheet.
+   */
   function _loadStylesheet(path) {
     let link  = window.document.createElement('link');
     link.rel  = 'stylesheet';
@@ -227,6 +258,10 @@ var RevealTracking = window.RevealTracking || (function () {
     window.document.getElementsByTagName('head')[0].appendChild(link);
   }
 
+  /**
+   * Query authentication API to check whether the current user
+   * token is valid.
+   */
   async function _userTokenIsValid() {
     if (
       config.apiConfig.authentication == undefined ||
@@ -252,6 +287,9 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  /**
+   * Request user token from authentication API.
+   */
   async function _requestUserToken() {
     if (
       config.apiConfig.authentication == undefined ||
@@ -279,6 +317,10 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 
   // Main Logic: helper functions
+
+  /**
+   * Track dwell time per slide.
+   */
   function _trackDwellTimes() {
     if (_tracksDwellTimePerSlide()) {
       Reveal.addEventListener('slidechanged', function(event) {
@@ -291,6 +333,10 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  /**
+   * Track last dwell time per slide and total dwell time.
+   * Also send data to trackingAPI.
+   */
   function _trackClosing() {
     window.addEventListener('pagehide', function() {
       if (_tracksDwellTimePerSlide()) {
@@ -310,6 +356,9 @@ var RevealTracking = window.RevealTracking || (function () {
     });
   }
 
+  /**
+   * Track clicks on links.
+   */
   function _trackLinks() {
     let tracksInternalLinks = config.links === true || config.links.internal;
     let tracksExternalLinks = config.links === true || config.links.external;
@@ -344,6 +393,9 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  /**
+   * Track slide transitions.
+   */
   function _trackSlideTransitions() {
     if (config.slideTransitions) {
       Reveal.addEventListener('slidechanged', function(event) {
@@ -370,6 +422,9 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  /**
+   * Track audio and video (play, pause, progress).
+   */
   function _trackMediaActions() {
     let tracksAudio = config.media === true || config.media.audio;
     let tracksVideo = config.media === true || config.media.video;
@@ -425,6 +480,11 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  /**
+   * Track quizzes from plug-in
+   * [reveal.js-quiz](https://gitlab.com/schaepermeier/reveal.js-quiz).
+   * Includes score, and whether they were started and completed.
+   */
   function _trackQuizzes() {
     if (config.revealDependencies.quiz) {
       let quizNames = Array.from(document.querySelectorAll('[data-quiz]')).map(quizScript => quizScript.dataset.quiz);
@@ -481,6 +541,10 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 
   // Helper methods.
+
+  /**
+   * Helper method to add event data to post body.
+   */
   function _track(eventType, eventData, options = {}) {
     let event;
     if (['dwellTimePerSlide', 'internalLink', 'externalLink'].includes(eventType)) {
@@ -534,6 +598,9 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  /**
+   * Helper method to add slide metadata to event data.
+   */
   function _eventWithSlideMetadata(eventType, eventData, options = {}) {
     let slideIndices = Reveal.getIndices();
     let event = {
@@ -582,6 +649,9 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  /**
+   * Adapter for fetch API with retries.
+   */
   async function fetchRetry(url, options, retries = 3) {
     try {
       return await fetch(url, options);
@@ -591,6 +661,9 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   };
 
+  /**
+   * Retrieve cookie by key.
+   */
   function _getCookie(key) {
     let cookie = document.cookie.split(';').filter(cookie => cookie.trim().startsWith(`${key}=`))[0];
     if (cookie) {
@@ -599,6 +672,9 @@ var RevealTracking = window.RevealTracking || (function () {
     return null;
   }
 
+  /**
+   * Set cookie for a given key and value.
+   */
   function _setCookie(key, value) {
     if (key && value) {
       let date = new Date();
@@ -607,20 +683,34 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  /**
+   * Delete cookie by key.
+   */
   function _removeCookie(key) {
     if (key) {
       document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
     }
   }
 
+  /**
+   * Remove unnecessary spaces and line breaks from string.
+   */
   function _strip(string) {
     return string.trim().replace(/(\s)+/g, ' ').replace(/\n/g, '');
   }
 
+  /**
+   * Returns whether the tracking plug-in is allowed
+   * to track the total dwell time.
+   */
   function _tracksTotalDwellTime() {
     return config.dwellTime === true || config.dwellTime.total;
   }
 
+  /**
+   * Returns whether the tracking plug-in is allowed
+   * to track the dwell time per slide.
+   */
   function _tracksDwellTimePerSlide() {
     return config.dwellTime === true || config.dwellTime.perSlide;
   }
@@ -633,7 +723,10 @@ var RevealTracking = window.RevealTracking || (function () {
       globalTimer.start();
       slideTimer.start();
 
+      // Register event listeners for tracking
       addEventListeners();
+      // Load and verify user token if it exists,
+      // then show the consent banner if applicable.
       loadUserToken().then(()=> showConsentBanner());
     },
   }
