@@ -452,12 +452,16 @@ var RevealTracking = window.RevealTracking || (function () {
         postBody.media = postBody.media || {};
         postBody.media[media.id] = {
           mediaType: mediaType,
-          source: this.currentSrc,
           played: false,
-          slideNumber: Reveal.getSlides().indexOf(Reveal.getSlide(horizontalIndex, verticalIndex)) + 1,
-          horizontalIndex: horizontalIndex,
-          verticalIndex: verticalIndex,
-          mediaIndex: mediaIndex,
+          mediaData: {
+            source: this.currentSrc,
+          },
+          slideData: {
+            slideNumber: Reveal.getSlides().indexOf(Reveal.getSlide(horizontalIndex, verticalIndex)) + 1,
+            horizontalIndex: horizontalIndex,
+            verticalIndex: verticalIndex,
+            mediaIndex: mediaIndex,
+          }
         };
 
         media.addEventListener('play', function () {
@@ -498,14 +502,18 @@ var RevealTracking = window.RevealTracking || (function () {
 
         postBody.quizzes = postBody.quizzes || {};
         postBody.quizzes[quizName] = {
-          quizName: quizConfig.info.name,
-          quizTopic: quizConfig.info.main,
-          numberOfQuestions: quizConfig.questions.length,
           started: false,
           completed: false,
-          slideNumber: Reveal.getSlides().indexOf(slide) + 1,
-          horizontalIndex: slideIndices.h,
-          verticalIndex: slideIndices.v,
+          quizMetadata: {
+            name: quizConfig.info.name,
+            topic: quizConfig.info.main,
+            numberOfQuestions: quizConfig.questions.length,
+          },
+          slideData: {
+            slideNumber: Reveal.getSlides().indexOf(slide) + 1,
+            horizontalIndex: slideIndices.h,
+            verticalIndex: slideIndices.v,
+          },
         };
 
         quizConfig.events = quizConfig.events || {};
@@ -548,7 +556,7 @@ var RevealTracking = window.RevealTracking || (function () {
   function _track(eventType, eventData, options = {}) {
     let event;
     if (['dwellTimePerSlide', 'internalLink', 'externalLink'].includes(eventType)) {
-      event = _eventWithSlideMetadata(eventType, eventData, options);
+      event = _eventWithslideData(eventType, eventData, options);
     }
 
     switch (eventType) {
@@ -601,20 +609,20 @@ var RevealTracking = window.RevealTracking || (function () {
   /**
    * Helper method to add slide metadata to event data.
    */
-  function _eventWithSlideMetadata(eventType, eventData, options = {}) {
+  function _eventWithslideData(eventType, eventData, options = {}) {
     let slideIndices = Reveal.getIndices();
     let event = {
       type: eventType,
-      eventData: {
+      ...eventData,
+      slideData: {
         slideNumber: Reveal.getSlidePastCount() + 1,
         horizontalIndex: slideIndices.h,
         verticalIndex: slideIndices.v,
-        ...eventData,
       },
     };
 
     if (!options.timestamp && config.timestamps) {
-      event.eventData.timestamp = globalTimer.toString();
+      event.timestamp = globalTimer.toString();
     }
 
     return event;
