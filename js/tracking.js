@@ -223,6 +223,34 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  function _trackSlideTransitions() {
+    if (config.slideTransitions) {
+      Reveal.addEventListener('slidechanged', function(event) {
+        let previousIndices = Reveal.getIndices(event.previousSlide);
+        let data = {
+          previousSlide: {
+            slideNumber: Reveal.getSlides().indexOf(event.previousSlide) + 1,
+            chapter: _getChapterNumber(previousIndices.h, previousIndices.v),
+            horizontalIndex: previousIndices.h,
+            verticalIndex: previousIndices.v,
+          },
+          currentSlide: {
+            slideNumber: Reveal.getSlidePastCount() + 1,
+            chapter: _getChapterNumber(event.indexh, event.indexv),
+            horizontalIndex: event.indexh,
+            verticalIndex: event.indexv,
+          },
+        };
+
+        if (config.timestamps) {
+          data.timestamp = globalTimer.toString();
+        }
+
+        _track('slideTransition', data);
+      });
+    }
+  }
+
   function _trackMediaActions() {
     let tracksAudio = config.media === true || config.media.audio;
     let tracksVideo = config.media === true || config.media.video;
@@ -281,34 +309,6 @@ var RevealTracking = window.RevealTracking || (function () {
 
   function _trackQuizzes() {
     // TODO
-  }
-
-  function _trackSlideTransitions() {
-    if (config.slideTransitions) {
-      Reveal.addEventListener('slidechanged', function(event) {
-        let previousIndices = Reveal.getIndices(event.previousSlide);
-        let data = {
-          previousSlide: {
-            slideNumber: Reveal.getSlides().indexOf(event.previousSlide) + 1,
-            chapter: _getChapterNumber(previousIndices.h, previousIndices.v),
-            horizontalIndex: previousIndices.h,
-            verticalIndex: previousIndices.v,
-          },
-          currentSlide: {
-            slideNumber: Reveal.getSlidePastCount(),
-            chapter: _getChapterNumber(event.indexh, event.indexv),
-            horizontalIndex: event.indexh,
-            verticalIndex: event.indexv,
-          },
-        };
-
-        if (config.timestamps) {
-          data.timestamp = globalTimer.toString();
-        }
-
-        _track('slideTransition', data);
-      });
-    }
   }
 
   // Helper methods.
