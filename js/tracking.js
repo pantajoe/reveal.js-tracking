@@ -78,11 +78,13 @@ var RevealTracking = window.RevealTracking || (function () {
    *   external: true,
    * },
    * media: {
+   *   * audio-slideshow plug-in is helpful
    *   audio: true,
    *   video: true,
    * },
    * slideTransitions: true,
    * revealDependencies: {
+   *   * requires quiz plug-in
    *   quiz: true,
    *   otherPluginInTheFuture: true,
    * },
@@ -237,22 +239,36 @@ var RevealTracking = window.RevealTracking || (function () {
       }(tracksAudio, tracksVideo);
 
       document.querySelectorAll(mediaSelector).forEach(function(media) {
-        media.addEventListener('play', function () {
-          let slideIndices = Reveal.getIndices();
+        let indicesRegex = media.id.match(/(audio|video)player\-(\d+)\.(\d+)(\.(\d+))?/);
+        if (!indicesRegex) return true;
 
-          _track(this.tagName.toLowerCase(), {
-            source: this.currentSrc,
-            slideNumber: Reveal.getSlidePastCount(),
-            chapter: _getChapterNumber(slideIndices.h, slideIndices.v),
-            horizontalIndex: slideIndices.h,
-            verticalIndex: slideIndices.v,
+        let mediaType       = indicesRegex[1],
+            horizontalIndex = parseInt(indicesRegex[2]),
+            verticalIndex   = parseInt(indicesRegex[3]),
+            mediaIndex      = parseInt(indicesRegex[5]) || 0;
+
+        postBody.media = postBody.media || {};
+        postBody.media[media.id] = {
+          mediaType: mediaType,
+          source: this.currentSrc,
+          played: false,
+          slideNumber: Reveal.getSlides().indexOf(Reveal.getSlide(horizontalIndex, verticalIndex)) + 1,
+          chapter: _getChapterNumber(horizontalIndex, verticalIndex),
+          horizontalIndex: horizontalIndex,
+          verticalIndex: verticalIndex,
+          mediaIndex: mediaIndex,
+        };
+
+        media.addEventListener('play', function () {
+          _track(mediaType, {
+            played: true,
           }, {
             id: this.id.replace(/\-/, '_'),
           });
         });
 
         media.addEventListener('pause', function () {
-          _track(this.tagName.toLowerCase(), {
+          _track(mediaType, {
             finished: this.ended,
             progress: this.currentTime / this.duration,
           }, {
