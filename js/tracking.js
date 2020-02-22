@@ -99,6 +99,7 @@ var RevealTracking = window.RevealTracking || (function () {
    *   video: true,
    * },
    * slideTransitions: true,
+   * timeline: true,
    * revealDependencies: {
    *   * requires quiz plug-in
    *   quiz: true,
@@ -127,10 +128,11 @@ var RevealTracking = window.RevealTracking || (function () {
     links: true,
     media: true,
     slideTransitions: true,
-    timestamps: true,
+    timeline: true,
     revealDependencies: {
       quiz: false,
     },
+    timestamps: true,
   };
 
   // overwrite default config with manual config
@@ -411,6 +413,24 @@ var RevealTracking = window.RevealTracking || (function () {
           if (options.timestamp) eventData.clickedAt = globalTimer.toString();
 
           _track(linkType, eventData, { id: event.target.href });
+
+          if (config.timeline) {
+            let timelineData = {
+              link: event.target.href,
+              linkText: event.target.text,
+              timeline: eventData.clickedAt || globalTimer.toString(),
+            };
+
+            if (isInternalLink) {
+              let indices = event.target.href.match(/#\/(\d+)\/(\d+)/);
+              timelineData.targetSlide = {
+                horizontalIndex: indices[1],
+                verticalIndex: indices[2],
+              };
+            }
+
+            _addToTimeline(linkType, timelineData);
+          }
         }
       });
     }
@@ -441,6 +461,11 @@ var RevealTracking = window.RevealTracking || (function () {
         }
 
         _track('slideTransition', data);
+
+        if (config.timeline) {
+          data.timestamp = data.timestamp || globalTimer.toString();
+          _addToTimeline('slideTransition', data);
+        }
       });
     }
   }
@@ -496,6 +521,15 @@ var RevealTracking = window.RevealTracking || (function () {
           _track(mediaType, eventData, {
             id: this.id,
           });
+
+          if (config.timeline) {
+            _addToTimeline(mediaType, {
+              mediaEvent: 'play',
+              mediaID: this.id,
+              mediaSource: this.currentSrc,
+              timestamp: eventData.playedAt || globalTimer.toString(),
+            });
+          }
         });
 
         media.addEventListener('pause', function () {
@@ -510,6 +544,17 @@ var RevealTracking = window.RevealTracking || (function () {
           _track(mediaType, eventData, {
             id: this.id,
           });
+
+          if (config.timeline) {
+            _addToTimeline(mediaType, {
+              mediaEvent: 'pause',
+              finished: this.ended,
+              progress: this.currentTime / this.duration,
+              mediaID: this.id,
+              mediaSource: this.currentSrc,
+              timestamp: eventData.pausedAt || globalTimer.toString(),
+            });
+          }
         });
       });
     }
@@ -549,48 +594,64 @@ var RevealTracking = window.RevealTracking || (function () {
 
         quizConfig.events = quizConfig.events || {};
 
+        function trackQuizStart() {
+          quizTimer = new Timer();
+          quizTimer.start();
+
+          _track('quiz', { started: true }, { id: quizName });
+          
+          if (config.timeline) {
+            _addToTimeline('quiz', {
+              quizEvent: 'start',
+              quizID: quizName,
+              timestamp: quizTimer.toString(),
+            });
+          }
+        }
+
+        function trackQuizComplete(options) {
+          let dwellTime = quizTimer.toString();
+          quizTimer.clear();
+
+          _track('quiz', {
+            completed: true,
+            score: options.score,
+            dwellTime: dwellTime,
+          }, { id: quizName });
+
+          if (config.timeline) {
+            _addToTimeline('quiz', {
+              quizEvent: 'complete',
+              quizID: quizName,
+              completed: true,
+              score: options.score,
+              dwellTime: dwellTime,
+              timestamp: quizTimer.toString(),
+            });
+          }
+        }
+
         if (quizConfig.events.onStartQuiz) {
           let existingCallback = quizConfig.events.onStartQuiz;
           quizConfig.events.onStartQuiz = function() {
-            quizTimer = new Timer();
-            quizTimer.start();
-
-            _track('quiz', { started: true }, { id: quizName });
+            trackQuizStart();
             existingCallback();
           }
         } else {
           quizConfig.events.onStartQuiz = function() {
-            quizTimer = new Timer();
-            quizTimer.start();
-
-            _track('quiz', { started: true }, { id: quizName });
+            trackQuizStart();
           }
         }
 
         if (quizConfig.events.onCompleteQuiz) {
           let existingCallback = quizConfig.events.onCompleteQuiz;
           quizConfig.events.onCompleteQuiz = function(options) {
-            let dwellTime = quizTimer.toString();
-            quizTimer.clear();
-
-            _track('quiz', {
-              completed: true,
-              score: options.score,
-              dwellTime: dwellTime,
-            }, { id: quizName });
-
+            trackQuizComplete(options);
             existingCallback(options);
           }
         } else {
           quizConfig.events.onCompleteQuiz = function(options) {
-            let dwellTime = quizTimer.toString();
-            quizTimer.clear();
-
-            _track('quiz', {
-              completed: true,
-              score: options.score,
-              dwellTime: dwellTime,
-            }, { id: quizName });
+            trackQuizComplete(options);
           }
         }
       });
@@ -660,6 +721,17 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 
   /**
+   * Add event to timeline. Timeline events always include a timestamp.
+   */
+  function _addToTimeline(eventType, eventData) {
+    if (config.timeline) {
+      postBody.timeline = postBody.timeline || [];
+      let event = _eventWithSlideData(eventType, eventData);
+      postBody.timeline.push(event);
+    }
+  }
+
+  /**
    * Helper method to add slide metadata to event data.
    */
   function _eventWithSlideData(eventType, eventData, options = {}) {
@@ -693,7 +765,8 @@ var RevealTracking = window.RevealTracking || (function () {
    *   slideTransitions: Array,
    *   links: Array,
    *   media: Object,
-   *   quizzes: Object
+   *   quizzes: Object,
+   *   timeline: Array
    * }
    */
   function _sendData() {
