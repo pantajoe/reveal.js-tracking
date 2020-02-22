@@ -509,10 +509,12 @@ var RevealTracking = window.RevealTracking || (function () {
   function _sendData() {
     if (consentGiven) {
       if (userToken) {
-        navigator.sendBeacon(config.api.apiConfig.trackingAPI, JSON.stringify(postBody));
+        postBody.userToken = userToken;
       } else {
-        console.error('No userToken is given even though the user accepted. Please check the logs.');
+        console.warn('No user token is given.');
       }
+
+      navigator.sendBeacon(config.api.apiConfig.trackingAPI, JSON.stringify(postBody));
     } else {
       console.warn('The user has not accepted to being tracked. No tracking data will be sent.');
     }
