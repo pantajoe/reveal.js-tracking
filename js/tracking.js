@@ -364,30 +364,53 @@ var RevealTracking = window.RevealTracking || (function () {
     let tracksExternalLinks = config.links === true || config.links.external;
 
     if (tracksInternalLinks || tracksExternalLinks) {
+      // Retrieve all links
+      postBody.links = postBody.links || [];
+      Reveal.addEventListener('slidechanged', function() {
+        document.querySelectorAll(`#${Reveal.getCurrentSlide().id} a`).forEach(function(link) {
+          let isInternalLink = link.href.startsWith('#');
+
+          if (isInternalLink) {
+            if (tracksInternalLinks) {
+              let matches = link.href.match(/#\/(\d+)\/(\d+)/);
+              postBody.links[link.href] = {
+                clicked: false,
+                linkData: {
+                  link: link.href,
+                  linkText: link.text,
+                  targetSlide: {
+                    horizontalIndex: matches[1],
+                    verticalIndex: matches[2],
+                  },
+                },
+              }
+            }
+          } else {
+            if (tracksExternalLinks) {
+              postBody.links[link.href] = {
+                clicked: false,
+                linkData: {
+                  link: link.href,
+                  linkText: link.text,
+                },
+              }
+            }
+          }
+        });
+      });
+
+      // Add click event listeners
       document.addEventListener('click', function(event) {
         if (!event.target.matches(`#${Reveal.getCurrentSlide().id} a`)) return true;
 
         let isInternalLink = event.target.href.startsWith('#');
 
-        if (isInternalLink) {
-          if (tracksInternalLinks) {
-            let matches = event.target.href.match(/#\/(\d+)\/(\d+)/);
-            _track('internalLink', {
-              link: event.target.href,
-              linkText: event.target.text,
-              target: {
-                horizontalIndex: matches[1],
-                verticalIndex: matches[2],
-              },
-            });
-          }
-        } else {
-          if (tracksExternalLinks) {
-            _track('externalLink', {
-              link: event.target.href,
-              linkText: event.target.text,
-            });
-          }
+        if ((isInternalLink && tracksInternalLinks) || (!isInternalLink && tracksExternalLinks)) {
+          let linkType = isInternalLink ? 'internalLink' : 'externalLink';
+          let eventData = { clicked: true };
+          if (options.timestamp) eventData.clickedAt = globalTimer.toString();
+
+          _track(linkType, eventData, { id: event.target.href });
         }
       });
     }
@@ -563,8 +586,8 @@ var RevealTracking = window.RevealTracking || (function () {
    */
   function _track(eventType, eventData, options = {}) {
     let event;
-    if (['dwellTimePerSlide', 'internalLink', 'externalLink'].includes(eventType)) {
-      event = _eventWithslideData(eventType, eventData, options);
+    if (eventType == 'dwellTimePerSlide') {
+      event = _eventWithSlideData(eventType, eventData, options);
     }
 
     switch (eventType) {
@@ -581,8 +604,12 @@ var RevealTracking = window.RevealTracking || (function () {
         break;
 
       case 'internalLink', 'externalLink':
-        postBody.links = postBody.links || [];
-        postBody.links.push(event);
+        postBody.links = postBody.links || {};
+        postBody.links[options.id] = postBody.links[options.id] || {};
+        postBody.links[options.id] = {
+          ...postBody.links[options.id],
+          ...eventData,
+        }
         break;
 
       case 'slideTransition':
@@ -617,7 +644,7 @@ var RevealTracking = window.RevealTracking || (function () {
   /**
    * Helper method to add slide metadata to event data.
    */
-  function _eventWithslideData(eventType, eventData, options = {}) {
+  function _eventWithSlideData(eventType, eventData, options = {}) {
     let slideIndices = Reveal.getIndices();
     let event = {
       type: eventType,
