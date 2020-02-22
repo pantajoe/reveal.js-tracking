@@ -59,15 +59,25 @@ var RevealTracking = window.RevealTracking || (function () {
    * apiConfig: {
    *   authenticationAPI: {
    *     validateTokenEndpoint: 'https://learning.analytics/api/authentication/validate-token',
-   *     generateTokenEndpoint: 'https://learning.analytics/api/authentication/generate-token',
+   *     requestTokenEndpoint: 'https://learning.analytics/api/authentication/generate-token',
    *   },
    *   trackingAPI: 'https://learning.analytics/api/tracking',
    * },
    * consentBanner: {
-   *   close: '&times;',
-   *   consentButton: 'Okay!',
-   *   description: 'This presentation uses pseudonymous tracking for Learning Analytics. For more information click <a href="%link%">here</a>'
-   *   link: 'https://learning.analytics/privacy',
+   *   closeButton: {
+   *     class: 'consent-banner--close',
+   *     text: '&times;',
+   *   },
+   *   consentButton: {
+   *     class: 'consent-banner--button',
+   *     text: 'Okay!',
+   *   },
+   *   infoText: 'This presentation uses pseudonymous tracking for Learning Analytics.',
+   *   moreLink: {
+   *     class: 'consent-banner--more-link',
+   *     href: 'https://learning.analytics/privacy',
+   *     text: 'Learn more',
+   *   },
    * },
    * dwellTime: {
    *   total: true,
@@ -93,9 +103,19 @@ var RevealTracking = window.RevealTracking || (function () {
   var defaultConfig = {
     apiConfig: {},
     consentBanner: {
-      close: '&times;',
-      consentButton: 'Okay!',
-      description: 'This presentation uses pseudonymous tracking for Learning Analytics. For more information click <a href="%link%">here</a>', 
+      closeButton: {
+        class: 'consent-banner--close',
+        text: '&times;',
+      },
+      consentButton: {
+        class: 'consent-banner--button',
+        text: 'Okay!',
+      },
+      infoText: 'This presentation uses pseudonymous tracking for Learning Analytics.',
+      moreLink: {
+        class: 'consent-banner--more-link',
+        text: 'Learn more',
+      },
     },
     dwellTime: true,
     links: true,
@@ -147,10 +167,34 @@ var RevealTracking = window.RevealTracking || (function () {
 
   // Main Logic: public functions
   function showConsentBanner() {
-    // TODO: Load CSS; show banner at the top
-    // TODO: eventListener onclick = consentVariable
-    // TODO: eventListener onclick 3 retries for Token (generation, validation)
-    // TODO: do not forget the cookie
+    if (userToken == undefined) {
+      _loadStylesheet(document.currentScript.src + '/../../css/tracking.css');
+      let cbConfig = config.consentBanner;
+
+      let consentBanner = document.createElement('div');
+      consentBanner.classList.add('consent-banner');
+      consentBanner.innerHTML = _strip(`
+        <span class="${cbConfig.closeButton.class}">${cbConfig.closeButton.text}</span>
+        <p class="consent-banner--info-text">
+          ${cbConfig.infoText}
+          <a class="${cbConfig.moreLink.class}" href="${cbConfig.moreLink.href}" target="_blank">${cbConfig.moreLink.text}</a>
+        </p>
+        <button class="${cbConfig.consentButton.class}">${cbConfig.consentButton.text}</button>
+      `);
+
+      consentBanner.querySelector(`.${cbConfig.closeButton.class}`).addEventListener('click', function() {
+        consentBanner.remove();
+        consentGiven = false;
+      });
+
+      consentBanner.querySelector(`.${cbConfig.consentButton.class}`).addEventListener('click', function() {
+        consentBanner.remove();
+        consentGiven = true;
+        _requestUserToken();
+      });
+
+      document.body.prepend(consentBanner);
+    }
   }
 
   function addEventListeners() {
@@ -160,6 +204,16 @@ var RevealTracking = window.RevealTracking || (function () {
     _trackSlideTransitions();
     _trackMediaActions();
     _trackQuizzes();
+  }
+
+  // Consent Banner: helper functions
+  function _loadStylesheet(path) {
+    let link  = window.document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = path;
+
+    window.document.getElementsByTagName('head')[0].appendChild(link);
   }
 
   // Main Logic: helper functions
