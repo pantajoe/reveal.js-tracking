@@ -558,6 +558,13 @@ var RevealTracking = window.RevealTracking || (function () {
             _track('quiz', { started: true }, { id: quizName });
             existingCallback();
           }
+        } else {
+          quizConfig.events.onStartQuiz = function() {
+            quizTimer = new Timer();
+            quizTimer.start();
+
+            _track('quiz', { started: true }, { id: quizName });
+          }
         }
 
         if (quizConfig.events.onCompleteQuiz) {
@@ -573,6 +580,17 @@ var RevealTracking = window.RevealTracking || (function () {
             }, { id: quizName });
 
             existingCallback(options);
+          }
+        } else {
+          quizConfig.events.onCompleteQuiz = function(options) {
+            let dwellTime = quizTimer.toString();
+            quizTimer.clear();
+
+            _track('quiz', {
+              completed: true,
+              score: options.score,
+              dwellTime: dwellTime,
+            }, { id: quizName });
           }
         }
       });
