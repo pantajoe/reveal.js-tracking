@@ -166,6 +166,17 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 
   // Main Logic: public functions
+  async function loadUserToken() {
+    userToken = _getCookie('user_token') || window.localStorage.getItem('user_token');
+
+    let isValid = await _userTokenIsValid();
+    consentGiven = true;
+
+    if (!isValid) {
+      await _requestUserToken();
+    }
+  }
+
   function showConsentBanner() {
     if (userToken == undefined) {
       _loadStylesheet(document.currentScript.src + '/../../css/tracking.css');
@@ -214,6 +225,57 @@ var RevealTracking = window.RevealTracking || (function () {
     link.href = path;
 
     window.document.getElementsByTagName('head')[0].appendChild(link);
+  }
+
+  async function _userTokenIsValid() {
+    if (
+      config.apiConfig.authentication == undefined ||
+      config.apiConfig.authentication.validateTokenEndpoint == undefined
+    ) {
+      return true;
+    }
+
+    try {
+      let response = await fetchRetry(config.apiConfig.authentication.validateTokenEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_token: userToken }),
+      });
+      let data = await response.json();
+
+      return data.valid;
+    } catch(err) {
+      console.warn(err);
+      return false;
+    }
+  }
+
+  async function _requestUserToken() {
+    if (
+      config.apiConfig.authentication == undefined ||
+      config.apiConfig.authentication.requestTokenEndpoint == undefined
+    ) {
+      userToken = null;
+      _removeCookie('user_token');
+      window.localStorage.removeItem('user_token');
+      return;
+    }
+
+    try {
+      let response = await fetchRetry(config.apiConfig.authentication.requestTokenEndpoint, {
+        method: 'POST',
+      });
+      let data = await response.json();
+
+      userToken = data.user_token;
+      window.localStorage.setItem('user_token', data.user_token);
+      _setCookie('user_token', data.user_token);
+    } catch(err) {
+      console.warn(err)
+      userToken = null;
+    }
   }
 
   // Main Logic: helper functions
@@ -520,6 +582,37 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
+  async function fetchRetry(url, options, retries = 3) {
+    try {
+      return await fetch(url, options);
+    } catch(err) {
+      if (retries === 1) throw err;
+      return await fetchRetry(url, options, retries - 1);
+    }
+  };
+
+  function _getCookie(key) {
+    let cookie = document.cookie.split(';').filter(cookie => cookie.trim().startsWith(`${key}=`))[0];
+    if (cookie) {
+      return cookie.trim().split('=')[1];
+    }
+    return null;
+  }
+
+  function _setCookie(key, value) {
+    if (key && value) {
+      let date = new Date();
+      date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+      document.cookie = `${key}=${value}; expires=${date.toGMTString()}`;
+    }
+  }
+
+  function _removeCookie(key) {
+    if (key) {
+      document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    }
+  }
+
   function _strip(string) {
     return string.trim().replace(/(\s)+/g, ' ').replace(/\n/g, '');
   }
@@ -541,7 +634,7 @@ var RevealTracking = window.RevealTracking || (function () {
       slideTimer.start();
 
       addEventListeners();
-      showConsentBanner();
+      loadUserToken().then(()=> showConsentBanner());
     },
   }
 })();
