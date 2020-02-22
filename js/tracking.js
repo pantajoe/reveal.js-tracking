@@ -108,7 +108,7 @@ var RevealTracking = window.RevealTracking || (function () {
   };
 
   var config = {...defaultConfig, ...Reveal.getConfig().tracking};
-  var slideTimer, globalTimer;
+  var slideTimer, globalTimer, quizTimer;
   var postBody = {};
 
   // Validate configuration for tracking plug-in
@@ -308,7 +308,58 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 
   function _trackQuizzes() {
-    // TODO
+    if (config.revealDependencies.quiz) {
+      let quizNames = Array.from(document.querySelectorAll('[data-quiz]')).map(quizScript => quizScript.dataset.quiz);
+
+      quizNames.forEach(function(quizName) {
+        let quizConfig = window[quizName];
+        if (!quizConfig) return true;
+
+        let slide = document.querySelector(`[data-quiz="${quizName}"]`).parentElement;
+        let slideIndices = Reveal.getIndices(slide);
+
+        postBody.quizzes = postBody.quizzes || {};
+        postBody.quizzes[quizName] = {
+          quizName: quizConfig.info.name,
+          quizTopic: quizConfig.info.main,
+          numberOfQuestions: quizConfig.questions.length,
+          started: false,
+          completed: false,
+          slideNumber: Reveal.getSlides().indexOf(slide) + 1,
+          horizontalIndex: slideIndices.h,
+          verticalIndex: slideIndices.v,
+        };
+
+        quizConfig.events = quizConfig.events || {};
+
+        if (quizConfig.events.onStartQuiz) {
+          let existingCallback = quizConfig.events.onStartQuiz;
+          quizConfig.events.onStartQuiz = function() {
+            quizTimer = new Timer();
+            quizTimer.start();
+
+            _track('quiz', { started: true }, { id: quizName });
+            existingCallback();
+          }
+        }
+
+        if (quizConfig.events.onCompleteQuiz) {
+          let existingCallback = quizConfig.events.onCompleteQuiz;
+          quizConfig.events.onCompleteQuiz = function(options) {
+            let dwellTime = quizTimer.toString();
+            quizTimer.clear();
+
+            _track('quiz', {
+              completed: true,
+              score: options.score,
+              dwellTime: dwellTime,
+            }, { id: quizName });
+
+            existingCallback(options);
+          }
+        }
+      });
+    }
   }
 
   // Helper methods.
@@ -350,6 +401,15 @@ var RevealTracking = window.RevealTracking || (function () {
         }
         break;
 
+      case 'quiz':
+        postBody.quizzes = postBody.quizzes || {};
+        postBody.quizzes[options.id] = postBody.quizzes[options.id] || {};
+        postBody.quizzes[options.id] = {
+          ...postBody.quizzes[options.id],
+          ...eventData,
+        }
+        break;
+
       default:
         console.error(`the event ${eventType} does not exist. Thus, this data ${eventData} was lost.`);
         break;
@@ -387,7 +447,7 @@ var RevealTracking = window.RevealTracking || (function () {
    *   slideTransitions: Array,
    *   links: Array,
    *   media: Object,
-   *   quizzes: Array
+   *   quizzes: Object
    * }
    */
   function _sendData() {
