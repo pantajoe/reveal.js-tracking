@@ -110,6 +110,8 @@ var RevealTracking = window.RevealTracking || (function () {
   var config = {...defaultConfig, ...Reveal.getConfig().tracking};
   var slideTimer, globalTimer, quizTimer;
   var postBody = {};
+  var consentGiven = false;
+  var userToken;
 
   // Validate configuration for tracking plug-in
   if (config.apiConfig.trackingAPI === undefined) {
@@ -451,9 +453,15 @@ var RevealTracking = window.RevealTracking || (function () {
    * }
    */
   function _sendData() {
-    // TODO: only send if consent given, otherwise display warn message to console.
-    // TODO: use navigator.sendBeacon
-    // TODO: 3 retries if possible
+    if (consentGiven) {
+      if (userToken) {
+        navigator.sendBeacon(config.api.apiConfig.trackingAPI, JSON.stringify(postBody));
+      } else {
+        console.error('No userToken is given even though the user accepted. Please check the logs.');
+      }
+    } else {
+      console.warn('The user has not accepted to being tracked. No tracking data will be sent.');
+    }
   }
 
   function _strip(string) {
