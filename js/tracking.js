@@ -134,26 +134,26 @@ var RevealTracking = window.RevealTracking || (function () {
   var userToken;
 
   // Validate configuration for tracking plug-in
-  if (config.apiConfig.trackingAPI === undefined) {
+  if (config.apiConfig.trackingAPI == undefined) {
     console.error('You have no trackingAPI configured where to send tracking data to!');
     return;
   }
 
   if (
-    config.apiConfig.authentication === undefined ||
-    config.apiConfig.authentication.generateTokenEndpoint === undefined
+    config.apiConfig.authentication == undefined ||
+    config.apiConfig.authentication.requestTokenEndpoint == undefined
   ) {
     console.warn(
       _strip(`
         You have no authenticationAPI configured.
         The tracking requests will not have tokens and the tracking data will be completely anonymous. 
-        Please consider setting apiConfig.authentication.generateTokenEndpoint and
+        Please consider setting apiConfig.authentication.requestTokenEndpoint and
         apiConfig.authentication.validateTokenEndpoint.
       `)
     );
   } else if (
-    config.apiConfig.authentication.generateTokenEndpoint !== undefined &&
-    config.apiConfig.authentication.validateTokenEndpoint === undefined
+    config.apiConfig.authentication.requestTokenEndpoint != undefined &&
+    config.apiConfig.authentication.validateTokenEndpoint == undefined
   ) {
     console.warn(
       _strip(`
