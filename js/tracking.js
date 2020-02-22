@@ -185,12 +185,12 @@ var RevealTracking = window.RevealTracking || (function () {
       let consentBanner = document.createElement('div');
       consentBanner.classList.add('consent-banner');
       consentBanner.innerHTML = _strip(`
-        <span class="${cbConfig.closeButton.class}">${cbConfig.closeButton.text}</span>
         <p class="consent-banner--info-text">
           ${cbConfig.infoText}
           <a class="${cbConfig.moreLink.class}" href="${cbConfig.moreLink.href || '#'}" target="_blank">${cbConfig.moreLink.text}</a>
         </p>
         <button class="${cbConfig.consentButton.class}">${cbConfig.consentButton.text}</button>
+        <a class="${cbConfig.closeButton.class}">${cbConfig.closeButton.text}</a>
       `);
 
       consentBanner.querySelector(`.${cbConfig.closeButton.class}`).addEventListener('click', function() {
