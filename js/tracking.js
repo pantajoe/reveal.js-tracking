@@ -316,7 +316,7 @@ var RevealTracking = window.RevealTracking || (function () {
     }
   }
 
-  // Main Logic: helper functions
+  // Tracking logic: helper functions
 
   /**
    * Track dwell time per slide.
