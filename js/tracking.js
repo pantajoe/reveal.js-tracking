@@ -164,7 +164,7 @@ var RevealTracking = window.RevealTracking || (function () {
       Reveal.addEventListener('slidechanged', function(event) {
         _track('dwellTimePerSlide', {
           dwellTime: slideTimer.toString(),
-        });
+        }, { timestamp: false });
 
         slideTimer.reset();
       });
@@ -176,14 +176,14 @@ var RevealTracking = window.RevealTracking || (function () {
       if (_tracksDwellTimePerSlide()) {
         _track('dwellTimePerSlide', {
           dwellTime: globalTimer.toString(),
-        });
+        }, { timestamp: false });
       }
 
       if (_tracksTotalDwellTime()) {
         _track('totalDwellTime', {
           dwellTime: globalTimer.toString(),
           finalProgress: Reveal.getProgress(),
-        });
+        }, { timestamp: false });
       }
 
       _sendData();
