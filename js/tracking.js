@@ -342,7 +342,7 @@ var RevealTracking = window.RevealTracking || (function () {
         break;
 
       case 'audio', 'video':
-        postBody.media = postBody.media || {}
+        postBody.media = postBody.media || {};
         postBody.media[options.id] = postBody.media[options.id] || {};
         postBody.media[options.id] = {
           ...postBody.media[options.id],
