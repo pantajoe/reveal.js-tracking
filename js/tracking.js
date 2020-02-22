@@ -333,6 +333,10 @@ var RevealTracking = window.RevealTracking || (function () {
           ...eventData,
         }
         break;
+
+      default:
+        console.error(`the event ${eventType} does not exist. Thus, this data ${eventData} was lost.`);
+        break;
     }
   }
 
