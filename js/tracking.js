@@ -317,7 +317,7 @@ var RevealTracking = window.RevealTracking || (function () {
     let event = {
       type: eventType,
       eventData: {
-        slideNumber: Reveal.getSlidePastCount(),
+        slideNumber: Reveal.getSlidePastCount() + 1,
         chapter: _getChapterNumber(slideIndices.h, slideIndices.v),
         horizontalIndex: slideIndices.h,
         verticalIndex: slideIndices.v,
