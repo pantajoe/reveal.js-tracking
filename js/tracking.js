@@ -205,10 +205,13 @@ var RevealTracking = window.RevealTracking || (function () {
         if (isInternalLink) {
           if (tracksInternalLinks) {
             let matches = event.target.href.match(/#\/(\d+)\/(\d+)/);
-            _track('externalLink', {
+            _track('internalLink', {
               link: event.target.href,
               linkText: event.target.text,
-              chapterLink: _getChapterNumber(matches[1], matches[2]),
+              target: {
+                horizontalIndex: matches[1],
+                verticalIndex: matches[2],
+              },
             });
           }
         } else {
@@ -230,13 +233,11 @@ var RevealTracking = window.RevealTracking || (function () {
         let data = {
           previousSlide: {
             slideNumber: Reveal.getSlides().indexOf(event.previousSlide) + 1,
-            chapter: _getChapterNumber(previousIndices.h, previousIndices.v),
             horizontalIndex: previousIndices.h,
             verticalIndex: previousIndices.v,
           },
           currentSlide: {
             slideNumber: Reveal.getSlidePastCount() + 1,
-            chapter: _getChapterNumber(event.indexh, event.indexv),
             horizontalIndex: event.indexh,
             verticalIndex: event.indexv,
           },
@@ -281,7 +282,6 @@ var RevealTracking = window.RevealTracking || (function () {
           source: this.currentSrc,
           played: false,
           slideNumber: Reveal.getSlides().indexOf(Reveal.getSlide(horizontalIndex, verticalIndex)) + 1,
-          chapter: _getChapterNumber(horizontalIndex, verticalIndex),
           horizontalIndex: horizontalIndex,
           verticalIndex: verticalIndex,
           mediaIndex: mediaIndex,
@@ -362,7 +362,6 @@ var RevealTracking = window.RevealTracking || (function () {
       type: eventType,
       eventData: {
         slideNumber: Reveal.getSlidePastCount() + 1,
-        chapter: _getChapterNumber(slideIndices.h, slideIndices.v),
         horizontalIndex: slideIndices.h,
         verticalIndex: slideIndices.v,
         ...eventData,
@@ -399,14 +398,6 @@ var RevealTracking = window.RevealTracking || (function () {
 
   function _strip(string) {
     return string.trim().replace(/(\s)+/g, ' ').replace(/\n/g, '');
-  }
-
-  function _getChapterNumber(indexh, indexv) {
-    if (indexv > 0) {
-      return `${indexh - 1}`;
-    } else {
-      return `${indexh - 1}.${indexv - 1}`;
-    }
   }
 
   function _tracksTotalDwellTime() {
