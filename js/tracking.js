@@ -465,18 +465,26 @@ var RevealTracking = window.RevealTracking || (function () {
         };
 
         media.addEventListener('play', function () {
-          _track(mediaType, {
-            played: true,
-          }, {
+          let eventData = { played: true };
+          if (config.timestamps) {
+            eventData.playedAt = globalTimer.toString();
+          }
+
+          _track(mediaType, eventData, {
             id: this.id,
           });
         });
 
         media.addEventListener('pause', function () {
-          _track(mediaType, {
+          let eventData = {
             finished: this.ended,
             progress: this.currentTime / this.duration,
-          }, {
+          };
+          if (config.timestamps) {
+            eventData.pausedAt = globalTimer.toString();
+          }
+
+          _track(mediaType, eventData, {
             id: this.id,
           });
         });
