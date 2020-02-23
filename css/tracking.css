@@ -1,8 +1,5 @@
-a, button {
-  transition: all ease-out .2s;
-}
-
 .consent-banner {
+  font-family: sans-serif;
   top: 0;
   margin: 0;
   left: 0;
@@ -14,6 +11,8 @@ a, button {
   position: fixed;
   justify-content: center;
   background-color: #303536;
+  z-index: 9999;
+  transition: all ease-out .2s;
 }
 
 .consent-banner--info-text {
@@ -22,6 +21,7 @@ a, button {
 
 .consent-banner--more-link {
   font-weight: bold;
+  color: #fcfcfc;
   text-decoration: underline;
 }
 
