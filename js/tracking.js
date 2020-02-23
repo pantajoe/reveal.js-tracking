@@ -376,10 +376,10 @@ var RevealTracking = window.RevealTracking || (function () {
     if (tracksInternalLinks || tracksExternalLinks) {
       // Retrieve all links
       postBody.links = postBody.links || [];
-      Reveal.addEventListener('slidechanged', function() {
-        document.querySelectorAll(`#${Reveal.getCurrentSlide().id} a`).forEach(function(link) {
+      Reveal.getSlides().forEach(function(slide) {
+        slide.querySelectorAll('a').forEach(function(link) {
           let isInternalLink = link.href.startsWith('#');
-          let indices = Reveal.getIndices();
+          let indices = Reveal.getIndices(slide);
 
           if (isInternalLink) {
             if (tracksInternalLinks) {
@@ -396,7 +396,7 @@ var RevealTracking = window.RevealTracking || (function () {
                   },
                 },
                 slideData: {
-                  slideNumber: Reveal.getSlidePastCount() + 1,
+                  slideNumber: Reveal.getSlides().indexOf(slide) + 1,
                   horizontalIndex: indices.h,
                   verticalIndex: indices.v,
                 },
@@ -412,7 +412,7 @@ var RevealTracking = window.RevealTracking || (function () {
                   linkText: link.text,
                 },
                 slideData: {
-                  slideNumber: Reveal.getSlidePastCount() + 1,
+                  slideNumber: Reveal.getSlides().indexOf(slide) + 1,
                   horizontalIndex: indices.h,
                   verticalIndex: indices.v,
                 },
