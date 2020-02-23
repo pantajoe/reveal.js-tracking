@@ -1,17 +1,16 @@
 # reveal.js-tracking
 
-- [reveal.js-tracking](#revealjs-tracking)
-  - [Usage](#usage)
-    - [Basic Usage](#basic-usage)
-      - [Pseudonymous Tracking](#pseudonymous-tracking)
-        - [The Consent Banner](#the-consent-banner)
-    - [Advanced Usage](#advanced-usage)
-      - [Hints](#hints)
-        - [Audios and Videos](#audios-and-videos)
-        - [Quizzes](#quizzes)
-      - [Default Configuration](#default-configuration)
-    - [Request Body to Tracking API](#request-body-to-tracking-api)
-  - [License](#license)
+- [Usage](#usage)
+  - [Basic Usage](#basic-usage)
+    - [Pseudonymous Tracking](#pseudonymous-tracking)
+      - [The Consent Banner](#the-consent-banner)
+  - [Advanced Usage](#advanced-usage)
+    - [Hints](#hints)
+      - [Audios and Videos](#audios-and-videos)
+      - [Quizzes](#quizzes)
+    - [Default Configuration](#default-configuration)
+  - [Request Body to Tracking API](#request-body-to-tracking-api)
+- [License](#license)
 
 An advanced tracking plug-in for reveal.js for purposes like Learning Analytics.
 
@@ -83,10 +82,6 @@ Reveal.initialize({
     media: true,
     // track slide transitions
     slideTransitions: true,
-    // include a timeline of events per session
-    timeline: true,
-    // include timestamps (00:00:00 when the presentation starts)
-    timestamps: true,
     // track events from other reveal.js plug-ins
     revealDependencies: {
       // track events from reveal.js-quiz plug-in
@@ -191,9 +186,7 @@ Here are list of configuration options with their defaults:
 | `links`                                             | `true`                                                                   | whether to track clicks on links. You can configure whether to track clicks on internal links (slides) and external links by setting `links.internal` and `links.external` to `true` or `false` |
 | `media`                                             | `true`                                                                   | whether to track interactions on audios and videos. You can configure whether to track interactions on audios and videos by setting `media.audio` and `media.video` to `true` or `false`        |
 | `slideTransitions`                                  | `true`                                                                   | whether to track slide transitions                                                                                                                                                              |
-| `timeline`                                          | `true`                                                                   | whether to include a detailed timeline of events (here, all events include a timestamp, regardless of the setting `timestamp`)                                                                  |
 | `revealDependencies.quiz`                           | `false`                                                                  | whether to track events in reveal.js plug-in [reveal.js-quiz](https://gitlab.com/schaepermeier/reveal.js-quiz)                                                                                  |
-| `timestamps`                                        | `true`                                                                   | whether to include timestamps                                                                                                                                                                   |
 
 #### Hints
 
@@ -248,27 +241,28 @@ If you want to track quizzes, here are the conditions:
   links: true,
   media: true,
   slideTransitions: true,
-  timeline: true,
   revealDependencies: {
     quiz: false,
   },
-  timestamps: true,
 }
 ```
 
 ### Request Body to Tracking API
 
-This is a sample request body in JSON to the tracking API. There is only one
-request per session and this is sent when the user closes the presentation.
+This is a sample request body in JSON format that can be sent to the tracking
+API. There is only one request per session and this is sent when the user closes
+the presentation.
 
 ```json
 {
   // the user token
   "userToken": "a-nice-user-token",
-  // progress in presentation when the user closed the presentation (between 0 and 1)
-  "finalProgress": 0.67823128904,
+  // presentation Url to identify the lecture
+  "presentationUrl": "https://my.presentation/current-lecture",
   // total number of slides of the presentation
   "totalNumberOfSlides": 29,
+  // progress in presentation when the user closed the presentation (between 0 and 1)
+  "finalProgress": 0.67823128904,
   // total dwell time in the presentation
   "totalDwellTime": "01:30:59",
   // list of dwell times per slide
@@ -311,126 +305,6 @@ request per session and this is sent when the user closes the presentation.
     },
     ...
   ],
-  // list of all happened slide transitions in chronological order
-  "slideTransitions": [
-    {
-      "previousSlide": {
-        "slideNumber": 1,
-        "horizontalIndex": 0,
-        "verticalIndex": 0
-      },
-      "currentSlide": {
-        "slideNumber": 2,
-        "horizontalIndex": 1,
-        "verticalIndex": 0
-      },
-      "timestamp": "00:00:15"
-    },
-    {
-      "previousSlide": {
-        "slideNumber": 2,
-        "horizontalIndex": 1,
-        "verticalIndex": 0
-      },
-      "currentSlide": {
-        "slideNumber": 3,
-        "horizontalIndex": 1,
-        "verticalIndex": 1
-      },
-      "timestamp": "00:00:23"
-    },
-    {
-      "previousSlide": {
-        "slideNumber": 3,
-        "horizontalIndex": 1,
-        "verticalIndex": 1
-      },
-      "currentSlide": {
-        "slideNumber": 4,
-        "horizontalIndex": 1,
-        "verticalIndex": 2
-      },
-      "timestamp": "00:05:25"
-    },
-    ...
-  ],
-  // list of all trackable links
-  "links": {
-    "https://github.com/hakimel/reveal.js": {
-      "clicked": true,
-      "clickedAt": "00:04:20",
-      "linkData": {
-        "type": "externalLink",
-        "link": "https://github.com/hakimel/reveal.js",
-        "linkText": "reveal.js"
-      },
-      "slideData": {
-        "slideNumber": 3,
-        "horizontalIndex": 1,
-        "verticalIndex": 1
-      }
-    },
-    "#/3/1": {
-      "clicked": false,
-      "linkData": {
-        "type": "internalLink",
-        "link": "#/3/1",
-        "linkText": "Plug-ins"
-      },
-      "targetSlide": {
-        "horizontalIndex": 3,
-        "verticalIndex": 1
-      },
-      "slideData": {
-        "slideNumber": 3,
-        "horizontalIndex": 1,
-        "verticalIndex": 1
-      }
-    },
-    ...
-  },
-  // list of all trackable media
-  "media": {
-    "audioplayer-3-1-0": {
-      "mediaType": "audio",
-      "played": true,
-      "playedAt": "00:03:12",
-      "finished": true,
-      // progress in percent (between 0 and 1)
-      "progress": 1,
-      "mediaData": {
-        "source": "https://my.presentation/audios/help01.ogg",
-      },
-      "slideData": {
-        "slideNumber": 3,
-        "horizontalIndex": 1,
-        "verticalIndex": 1,
-        "mediaIndex": 0
-      }
-    },
-    ...
-  },
-  "quizzes": {
-    "firstQuiz": {
-      "started": true,
-      "startedAt": "00:05:45",
-      "completed": true,
-      "completedAt": "00:10:45",
-      "dwellTime": "00:05:00",
-      "score": 2,
-      "quizMetadata": {
-        "name": "Test your knowledge!",
-        "topic": "What is reveal.js?",
-        "numberOfQuestions": 3
-      },
-      "slideData": {
-        "slideNumber": 4,
-        "horizontalIndex": 1,
-        "verticalIndex": 2
-      }
-    },
-    ...
-  },
   "timeline" : [
     {
       "type": "slideTransition",
@@ -461,6 +335,51 @@ request per session and this is sent when the user closes the presentation.
       "timestamp": "00:00:23"
     },
     {
+      "type": "externalLink",
+      "timestamp": "00:04:20",
+      "metadata": {
+        "href": "https://github.com/hakimel/reveal.js",
+        "linkText": "reveal.js"
+      },
+      "slideData": {
+        "slideNumber": 3,
+        "horizontalIndex": 1,
+        "verticalIndex": 1
+      }
+    },
+    {
+      "type": "audio",
+      "mediaEvent": "play",
+      "timestamp": "00:03:12",
+      "metadata": {
+        "id": "audioplayer-3-1-0",
+        "mediaSource": "https://my.presentation/audios/help01.ogg"
+      },
+      "slideData": {
+        "slideNumber": 3,
+        "horizontalIndex": 1,
+        "verticalIndex": 1,
+        "mediaIndex": 0
+      }
+    },
+    {
+      "type": "audio",
+      "mediaEvent": "pause",
+      "finished": true,
+      "progress": 1,
+      "timestamp": "00:03:15",
+      "metadata": {
+        "id": "audioplayer-3-1-0",
+        "mediaSource": "https://my.presentation/audios/help01.ogg"
+      },
+      "slideData": {
+        "slideNumber": 3,
+        "horizontalIndex": 1,
+        "verticalIndex": 1,
+        "mediaIndex": 0
+      }
+    },
+    {
       "type": "slideTransition",
       "previousSlide": {
         "slideNumber": 3,
@@ -475,49 +394,15 @@ request per session and this is sent when the user closes the presentation.
       "timestamp": "00:05:25"
     },
     {
-      "type": "externalLink",
-      "timestamp": "00:04:20",
-      "link": "https://github.com/hakimel/reveal.js",
-      "linkText": "reveal.js",
-      "slideData": {
-        "slideNumber": 3,
-        "horizontalIndex": 1,
-        "verticalIndex": 1
-      }
-    },
-    {
-      "type": "audio",
-      "mediaID": "audioplayer-3-1-0",
-      "mediaEvent": "play",
-      "timestamp": "00:03:12",
-      "mediaSource": "https://my.presentation/audios/help01.ogg",
-      "slideData": {
-        "slideNumber": 3,
-        "horizontalIndex": 1,
-        "verticalIndex": 1,
-        "mediaIndex": 0
-      }
-    },
-    {
-      "type": "audio",
-      "mediaID": "audioplayer-3-1-0",
-      "mediaEvent": "pause",
-      "finished": true,
-      "progress": 1,
-      "timestamp": "00:03:15",
-      "mediaSource": "https://my.presentation/audios/help01.ogg",
-      "slideData": {
-        "slideNumber": 3,
-        "horizontalIndex": 1,
-        "verticalIndex": 1,
-        "mediaIndex": 0
-      }
-    },
-    {
       "type": "quiz",
       "quizEvent": "start",
-      "quizID": "firstQuiz",
       "timestamp": "00:05:45",
+      "metadata": {
+        "id": "firstQuiz",
+        "name": "Test your knowledge!",
+        "topic": "What is reveal.js?",
+        "numberOfQuestions": 3
+      },
       "slideData": {
         "slideNumber": 4,
         "horizontalIndex": 1,
@@ -527,11 +412,16 @@ request per session and this is sent when the user closes the presentation.
     {
       "type": "quiz",
       "quizEvent": "complete",
-      "quizID": "firstQuiz",
-      "timestamp": "00:10:45",
       "dwellTime": "00:05:00",
       "completed": true,
       "score": 2,
+      "timestamp": "00:10:45",
+      "metadata": {
+        "id": "firstQuiz",
+        "name": "Test your knowledge!",
+        "topic": "What is reveal.js?",
+        "numberOfQuestions": 3
+      },
       "slideData": {
         "slideNumber": 4,
         "horizontalIndex": 1,
