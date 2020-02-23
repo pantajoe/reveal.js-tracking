@@ -86,7 +86,7 @@ var RevealTracking = window.RevealTracking || (function () {
    *     text: 'Learn more',
    *   },
    * },
-   * dwellTime: {
+   * dwellTimes: {
    *   total: true,
    *   perSlide: true,
    * },
@@ -125,7 +125,7 @@ var RevealTracking = window.RevealTracking || (function () {
         text: 'Learn more',
       },
     },
-    dwellTime: true,
+    dwellTimes: true,
     links: true,
     media: true,
     slideTransitions: true,
@@ -839,7 +839,7 @@ var RevealTracking = window.RevealTracking || (function () {
    * to track the total dwell time.
    */
   function _tracksTotalDwellTime() {
-    return config.dwellTime === true || config.dwellTime.total;
+    return config.dwellTimes === true || config.dwellTimes.total;
   }
 
   /**
@@ -847,7 +847,7 @@ var RevealTracking = window.RevealTracking || (function () {
    * to track the dwell time per slide.
    */
   function _tracksDwellTimePerSlide() {
-    return config.dwellTime === true || config.dwellTime.perSlide;
+    return config.dwellTimes === true || config.dwellTimes.perSlide;
   }
 
   // Return plug-in object
