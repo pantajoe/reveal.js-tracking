@@ -108,7 +108,7 @@ This plug-in also allows to set a
 a user token already exists in a cookie or the local storage. The existing token
 is sent via `POST` to this endpoint and expects a result like this:
 
-```json
+```javascript
 {
   "valid": true, // or false, depending on whether the token is valid or not.
 }
@@ -255,7 +255,7 @@ This is a sample request body in JSON format that can be sent to the tracking
 API. There is only one request per session and this is sent when the user closes
 the presentation.
 
-```json
+```javascript
 {
   // the user token
   "userToken": "a-nice-user-token",
