@@ -329,7 +329,10 @@ var RevealTracking = window.RevealTracking || (function () {
       Reveal.addEventListener('slidechanged', function(event) {
         _track('dwellTimePerSlide', {
           dwellTime: slideTimer.toString(),
-        }, { timestamp: false });
+        }, {
+          timestamp: false,
+          slide: event.previousSlide,
+        });
 
         slideTimer.reset();
       });
@@ -350,10 +353,14 @@ var RevealTracking = window.RevealTracking || (function () {
 
       if (_tracksTotalDwellTime()) {
         _track('totalDwellTime', {
-          dwellTime: globalTimer.toString(),
-          finalProgress: Reveal.getProgress(),
+          totalDwellTime: globalTimer.toString(),
         }, { timestamp: false });
       }
+
+      _track('end', {
+        finalProgress: Reveal.getProgress(),
+        totalNumberOfSlides: Reveal.getTotalSlides(),
+      });
 
       _sendData();
     });
@@ -372,6 +379,7 @@ var RevealTracking = window.RevealTracking || (function () {
       Reveal.addEventListener('slidechanged', function() {
         document.querySelectorAll(`#${Reveal.getCurrentSlide().id} a`).forEach(function(link) {
           let isInternalLink = link.href.startsWith('#');
+          let indices = Reveal.getIndices();
 
           if (isInternalLink) {
             if (tracksInternalLinks) {
@@ -379,12 +387,18 @@ var RevealTracking = window.RevealTracking || (function () {
               postBody.links[link.href] = {
                 clicked: false,
                 linkData: {
+                  type: 'internalLink',
                   link: link.href,
                   linkText: link.text,
                   targetSlide: {
                     horizontalIndex: matches[1],
                     verticalIndex: matches[2],
                   },
+                },
+                slideData: {
+                  slideNumber: Reveal.getSlidePastCount() + 1,
+                  horizontalIndex: indices.h,
+                  verticalIndex: indices.v,
                 },
               }
             }
@@ -393,8 +407,14 @@ var RevealTracking = window.RevealTracking || (function () {
               postBody.links[link.href] = {
                 clicked: false,
                 linkData: {
+                  type: 'externalLink',
                   link: link.href,
                   linkText: link.text,
+                },
+                slideData: {
+                  slideNumber: Reveal.getSlidePastCount() + 1,
+                  horizontalIndex: indices.h,
+                  verticalIndex: indices.v,
                 },
               }
             }
@@ -419,7 +439,7 @@ var RevealTracking = window.RevealTracking || (function () {
             let timelineData = {
               link: event.target.href,
               linkText: event.target.text,
-              timeline: eventData.clickedAt || globalTimer.toString(),
+              timestamp: eventData.clickedAt || globalTimer.toString(),
             };
 
             if (isInternalLink) {
@@ -598,14 +618,16 @@ var RevealTracking = window.RevealTracking || (function () {
         function trackQuizStart() {
           quizTimer = new Timer();
           quizTimer.start();
+          let data = { started: true };
+          if (config.timestamps) data.startedAt = globalTimer.toString();
 
-          _track('quiz', { started: true }, { id: quizName });
+          _track('quiz', data, { id: quizName });
           
           if (config.timeline) {
             _addToTimeline('quiz', {
               quizEvent: 'start',
               quizID: quizName,
-              timestamp: quizTimer.toString(),
+              timestamp: data.startedAt || globalTimer.toString(),
             });
           }
         }
@@ -614,11 +636,14 @@ var RevealTracking = window.RevealTracking || (function () {
           let dwellTime = quizTimer.toString();
           quizTimer.clear();
 
-          _track('quiz', {
+          let data = {
             completed: true,
             score: options.score,
             dwellTime: dwellTime,
-          }, { id: quizName });
+          };
+          if (config.timestamps) data.completedAt = globalTimer.toString();
+
+          _track('quiz', data, { id: quizName });
 
           if (config.timeline) {
             _addToTimeline('quiz', {
@@ -627,7 +652,7 @@ var RevealTracking = window.RevealTracking || (function () {
               completed: true,
               score: options.score,
               dwellTime: dwellTime,
-              timestamp: quizTimer.toString(),
+              timestamp: data.completedAt || globalTimer.toString(),
             });
           }
         }
@@ -676,7 +701,7 @@ var RevealTracking = window.RevealTracking || (function () {
         postBody.dwellTimes.push(event);
         break;
 
-      case 'totalDwellTime':
+      case 'totalDwellTime', 'end':
         postBody = {
           ...postBody,
           ...eventData,
@@ -736,16 +761,20 @@ var RevealTracking = window.RevealTracking || (function () {
    * Helper method to add slide metadata to event data.
    */
   function _eventWithSlideData(eventType, eventData, options = {}) {
-    let slideIndices = Reveal.getIndices();
+    let slide = options.slide || Reveal.getCurrentSlide();
+    let slideNumber = Reveal.getSlides().indexOf(slide) + 1;
+    let slideIndices = Reveal.getIndices(slide);
     let event = {
       type: eventType,
       ...eventData,
-      slideData: {
-        slideNumber: Reveal.getSlidePastCount() + 1,
+    };
+    if (['internalLink', 'externalLink', 'audio', 'video', 'quiz'].includes(eventType)) {
+      event.slideData = {
+        slideNumber: slideNumber,
         horizontalIndex: slideIndices.h,
         verticalIndex: slideIndices.v,
-      },
-    };
+      };
+    }
 
     if (!options.timestamp && config.timestamps) {
       event.timestamp = globalTimer.toString();
@@ -760,11 +789,11 @@ var RevealTracking = window.RevealTracking || (function () {
    * {
    *   userToken: string
    *   totalNumberOfSlides: integer,
-   *   progress: float,
+   *   finalProgress: float,
    *   totalDwellTime: string,
    *   dwellTimes: Array
    *   slideTransitions: Array,
-   *   links: Array,
+   *   links: Object,
    *   media: Object,
    *   quizzes: Object,
    *   timeline: Array
