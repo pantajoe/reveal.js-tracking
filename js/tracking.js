@@ -755,4 +755,4 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 })();
 
-Reveal.registerPlugin('tracking', RevealTracking);
+if (RevealTracking) Reveal.registerPlugin('tracking', RevealTracking);
