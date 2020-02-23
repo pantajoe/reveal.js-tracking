@@ -1,5 +1,6 @@
 /*!
  * reveal.js-tracking plugin v1.0.0
+ * Joe Pantazidis <joe.pantazidis@outlook.de>
  * MIT licensed
  *
  * Copyright (C) 2020 Joe Pantazidis
@@ -201,7 +202,7 @@ var RevealTracking = window.RevealTracking || (function () {
    * Display consent banner.
    */
   function showConsentBanner() {
-    if (userToken == undefined) {
+    if (userToken == undefined && config.consentBanner != false) {
       _loadStylesheet(document.currentScript.src + '/../../css/tracking.css');
       let cbConfig = config.consentBanner;
 
@@ -863,6 +864,12 @@ var RevealTracking = window.RevealTracking || (function () {
       // then show the consent banner if applicable.
       loadUserToken().then(()=> showConsentBanner());
     },
+    giveConsent: function() {
+      consentGiven = true;
+    },
+    removeConsent: function() {
+      consentGiven = false;
+    }
   }
 })();
 
