@@ -1,5 +1,7 @@
 # reveal.js-tracking
 
+## Table of Contents
+
 - [Usage](#usage)
   - [Basic Usage](#basic-usage)
     - [Pseudonymous Tracking](#pseudonymous-tracking)
