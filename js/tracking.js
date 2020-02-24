@@ -481,67 +481,86 @@ var RevealTracking = window.RevealTracking || (function () {
    */
   function _trackQuizzes() {
     if (config.revealDependencies.quiz) {
-      _getQuizzes().forEach(function(quizName) {
-        let quizConfig = window[quizName];
-        if (!quizConfig) return true;
+      let quizConfig = Reveal.getConfig().quiz || {};
+      quizConfig.events = quizConfig.events || {};
 
-        quizConfig.events = quizConfig.events || {};
-        quizMetadata = {
+      function trackQuizStart() {
+        let quizName = Reveal.getCurrentSlide().querySelector('[data-quiz]').dataset.quiz;
+        if (!quizName) return true;
+
+        let quiz = window[quizName];
+        if (!quiz) return true;
+
+        quizTimer = new Timer();
+        quizTimer.start();
+
+        let quizMetadata = {
           id: quizName,
-          name: quizConfig.info.name,
-          topic: quizConfig.info.main,
-          numberOfQuestions: quizConfig.questions.length,
+          name: quiz.info.name,
+          topic: quiz.info.main,
+          numberOfQuestions: quiz.questions.length,
         }
 
-        function trackQuizStart() {
-          quizTimer = new Timer();
-          quizTimer.start();
+        _track('quiz', {
+          quizEvent: 'start',
+          timestamp: globalTimer.toString(),
+          metadata: quizMetadata,
+        });
+      }
 
-          _track('quiz', {
-            quizEvent: 'start',
-            timestamp: globalTimer.toString(),
-            metadata: quizMetadata,
-          });
+      function trackQuizComplete(options) {
+        let quizName = Reveal.getCurrentSlide().querySelector('[data-quiz]').dataset.quiz;
+        if (!quizName) return true;
+
+        let quiz = window[quizName];
+        if (!quiz) return true;
+
+        let dwellTime = quizTimer.toString();
+        quizTimer.clear();
+
+        let quizMetadata = {
+          id: quizName,
+          name: quiz.info.name,
+          topic: quiz.info.main,
+          numberOfQuestions: quiz.questions.length,
         }
 
-        function trackQuizComplete(options) {
-          let dwellTime = quizTimer.toString();
-          quizTimer.clear();
+        _track('quiz', {
+          quizEvent: 'complete',
+          dwellTime: dwellTime,
+          completed: true,
+          score: options.score,
+          timestamp: globalTimer.toString(),
+          metadata: quizMetadata,
+        });
+      }
 
-          _track('quiz', {
-            quizEvent: 'complete',
-            dwellTime: dwellTime,
-            completed: true,
-            score: options.score,
-            timestamp: globalTimer.toString(),
-            metadata: quizMetadata,
-          });
+      if (quizConfig.events.onStartQuiz) {
+        let existingCallback = quizConfig.events.onStartQuiz;
+        quizConfig.events.onStartQuiz = function() {
+          trackQuizStart();
+          existingCallback();
         }
+      } else {
+        quizConfig.events.onStartQuiz = function() {
+          trackQuizStart();
+        }
+      }
 
-        if (quizConfig.events.onStartQuiz) {
-          let existingCallback = quizConfig.events.onStartQuiz;
-          quizConfig.events.onStartQuiz = function() {
-            trackQuizStart();
-            existingCallback();
-          }
-        } else {
-          quizConfig.events.onStartQuiz = function() {
-            trackQuizStart();
-          }
+      if (quizConfig.events.onCompleteQuiz) {
+        let existingCallback = quizConfig.events.onCompleteQuiz;
+        quizConfig.events.onCompleteQuiz = function(options) {
+          trackQuizComplete(options);
+          existingCallback(options);
         }
+      } else {
+        quizConfig.events.onCompleteQuiz = function(options) {
+          trackQuizComplete(options);
+        }
+      }
 
-        if (quizConfig.events.onCompleteQuiz) {
-          let existingCallback = quizConfig.events.onCompleteQuiz;
-          quizConfig.events.onCompleteQuiz = function(options) {
-            trackQuizComplete(options);
-            existingCallback(options);
-          }
-        } else {
-          quizConfig.events.onCompleteQuiz = function(options) {
-            trackQuizComplete(options);
-          }
-        }
-      });
+      // initialize the quizzes
+      prepareQuizzes(quizConfig);
     }
   }
 

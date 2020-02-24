@@ -213,11 +213,35 @@ does that automatically. For videos you need to this manually.
 
 If you want to track quizzes, here are the conditions:
 
-- this plug-in needs to be in the `dependencies` section before the quiz plug-in
-- quiz scripts need to be nested directly under the slide section in the DOM
-- when initializing the quizzes in the `dependencies` section, make sure that
-  the option `skipStartButton` is set to `false`. Otherwise the start event
-  cannot be tracked
+- this plug-in needs to be in the `dependencies` section *after* the quiz
+  plug-in
+- when adding the quiz plug-in to the `dependencies`, do not set `async` to
+  `true` and do not provide the `callback`. Simply put: `{ src:
+  'plugin/quiz/quiz.js' }` before `{ src: 'plugin/tracking/tracking.js' }`
+- instead, provide the configuration options for the quiz plug-in in a `quiz`
+  section when initializing reveal.js:
+
+```javascript
+Reveal.initialize({
+  ...,
+  dependencies: [
+    ...,
+    { src: 'plugin/quiz/quiz.js' },
+    { src: 'plugin/tracking/tracking.js' },
+    ...,
+  ],
+  ...,
+  tracking: ...,
+  quiz: {
+    ...,
+    preventUnanswered: true,
+    skipStartButton: false,
+  }
+});
+```
+
+- make sure that the option `skipStartButton` is set to `false`. Otherwise the
+  start event cannot be tracked
 
 #### Default Configuration
 
