@@ -58,6 +58,10 @@ class Timer {
   }
 };
 
+var globalTimer = new Timer(),
+    slideTimer  = new Timer(),
+    quizTimer   = new Timer();
+
 /**
  * Tracking plug-in for reveal.js
  */
@@ -134,9 +138,7 @@ var RevealTracking = window.RevealTracking || (function () {
 
   // overwrite default config with manual config
   var config = {...defaultConfig, ...Reveal.getConfig().tracking};
-  // define necessary timers
-  var slideTimer, globalTimer, quizTimer;
-  // this object is sent to the trackingAPI on window#pagehide
+  // this object is sent to the trackingAPI on window#unload
   var postBody = { timeline: [] };
   var consentGiven = false;
   var userToken;
