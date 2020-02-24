@@ -623,7 +623,7 @@ var RevealTracking = window.RevealTracking || (function () {
     return {
       slideNumber: slideNumber,
       horizontalIndex: indices.h,
-      verticalIndex: indices.v,
+      verticalIndex: indices.v || 0,
     };
   }
 
