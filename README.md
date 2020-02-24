@@ -31,14 +31,35 @@ events) and send them to Google Analytics, try the library
 If you wish to track more events than that, you can let the tracking being sent
 to your API, that then transmits the data to Google Analytics.
 
+## Demo
+
+To view the demo of this plug-in, make sure you have Docker and Docker-compose
+installed.
+
+1. Build the containers first with `docker-compose build`
+2. And then fire up the API and the demo presentation with `docker-compose up`
+
+On `http://localhost:8000`, you can click through the demo presentation.
+
+The API is accessible on `http://localhost:4567`. If you wish to see your latest
+tracking data from clicking through the demo presentation, simply visit
+`http://localhost:4567/last-tracked`. Optionally, you can also supply the user
+token that is saved in your cookies for the demo presentation (The cookie key is
+`user_token`) or in your HTML local storage (call
+`localStorage.getItem('user_token')`). Then, when accessing
+`http://localhost:4567/last-tracked/your-user-token-goes-here`, you can see the
+latest tracked data in JSON format.
+
+If you delete your localStorage and cookie, then you are treated as a new user.
+Have fun!
+
 ## Usage
 
 ### Basic Usage
 
-Simply
-[download](https://github.com/pantajosef/reveal.js-tracking/archive/master.zip)
-this folder (with both `tracking.css` in the `css` folder and `tracking.js` in
-the `js` folder) and add it to your reveal.js presentation's plug-in directory.
+Simply download this folder – you only need the `tracking.css` in the `css`
+folder and `tracking.js` in the `js` folder – and add it to your reveal.js
+presentation's plug-in directory.
 
 When initializing `Reveal`, add this plug-in to the dependencies:
 
