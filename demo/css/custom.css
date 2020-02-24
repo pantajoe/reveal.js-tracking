@@ -1,0 +1,7 @@
+#toc-progress-footer {
+  z-index: 2 !important;
+}
+
+[id^=slickQuiz] {
+  font-size: smaller;
+}
