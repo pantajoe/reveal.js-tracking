@@ -573,7 +573,8 @@ var RevealTracking = window.RevealTracking || (function () {
     let event = _createEvent(eventType, eventData, options);
 
     switch (eventType) {
-      case 'totalDwellTime', 'end':
+      case 'totalDwellTime':
+      case 'end':
         postBody = {
           ...postBody,
           ...eventData,
