@@ -2,6 +2,7 @@
 
 ## Table of Contents
 
+- [Demo](#demo)
 - [Usage](#usage)
   - [Basic Usage](#basic-usage)
     - [Pseudonymous Tracking](#pseudonymous-tracking)
