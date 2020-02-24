@@ -12,6 +12,8 @@ class GenerateToken
   private
 
   def generate_token
-    SecureRandom.uuid
+    token = SecureRandom.uuid
+    token = SecureRandom.uuid while Student.exists?(user_token: token)
+    token
   end
 end
