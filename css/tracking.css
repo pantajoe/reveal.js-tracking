@@ -16,7 +16,7 @@
 }
 
 .consent-banner--info-text {
-  margin-right: 3.2rem;
+  margin: auto 3.2rem auto 0;
 }
 
 .consent-banner--more-link {
@@ -43,6 +43,8 @@
   font-size: small;
   font-weight: bold;
   cursor: pointer;
+  width: auto;
+  padding: 1rem;
 }
 
 .consent-banner--button:hover,
