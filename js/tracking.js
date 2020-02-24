@@ -238,12 +238,9 @@ var RevealTracking = window.RevealTracking || (function () {
    */
   function startTimers() {
     if (_tracksDwellTimePerSlide()) {
-      globalTimer = new Timer();
-      slideTimer  = new Timer();
       globalTimer.start();
       slideTimer.start();
     } else {
-      globalTimer = new Timer();
       globalTimer.start();
     }
   }
