@@ -784,9 +784,13 @@ var RevealTracking = window.RevealTracking || (function () {
       // then show the consent banner if applicable.
       loadUserToken().then(()=> showConsentBanner());
 
-      Reveal.addEventListener('ready', function() {
+      if (Reveal.isReady()) {
         startTimers();
-      });
+      } else {
+        Reveal.addEventListener('ready', function() {
+          startTimers();
+        });
+      }
     },
     giveConsent: function() {
       consentGiven = true;
