@@ -570,7 +570,11 @@ var RevealTracking = window.RevealTracking || (function () {
    * Helper method to add event to timeline.
    */
   function _track(eventType, eventData, options = {}) {
-    let event = _createEvent(eventType, eventData, options);
+    let event;
+    
+    if (eventType != 'totalDwellTime') {
+      event = _createEvent(eventType, eventData, options);
+    }
 
     switch (eventType) {
       case 'totalDwellTime':
