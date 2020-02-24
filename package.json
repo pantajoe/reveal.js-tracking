@@ -1,0 +1,34 @@
+{
+  "name": "reveal.js-tracking",
+  "version": "1.0.0",
+  "description": "A plug-in for advanced tracking in reveal.js presentations (for purposes such as Learning Analytics)",
+  "main": "js/tracking.js",
+  "scripts": {
+    "start": "grunt serve"
+  },
+  "author": {
+    "name": "Joe Pantazidis",
+    "email": "joe.pantazidis@outlook.de"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pantajosef/reveal.js-tracking.git"
+  },
+  "engines": {
+    "node": ">=9.0.0"
+  },
+  "devDependencies": {
+    "express": "^4.16.2",
+    "grunt": "^1.0.4",
+    "grunt-autoprefixer": "^3.0.4",
+    "grunt-cli": "^1.3.2",
+    "grunt-contrib-connect": "^2.0.0",
+    "grunt-contrib-cssmin": "^3.0.0",
+    "grunt-contrib-uglify": "^3.3.0",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-zip": "~0.17.1",
+    "load-grunt-tasks": "^5.1.0",
+    "mustache": "^4.0.0"
+  },
+  "license": "MIT"
+}

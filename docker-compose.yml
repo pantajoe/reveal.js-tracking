@@ -1,0 +1,27 @@
+version: '3'
+services:
+  web:
+    build: ./app
+    command: bundle exec ruby app.rb -p4567 -o0.0.0.0
+    volumes:
+      - ./app:/app
+    ports:
+      - "4567:4567"
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./app/tmp/db:/var/lib/postgresql/data
+
+  demo:
+    build: .
+    command: npm start
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8000:8000"
+      - "35729:35729"

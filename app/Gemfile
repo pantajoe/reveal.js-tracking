@@ -1,0 +1,20 @@
+source 'https://rubygems.org'
+git_source(:github) {|repo| "https://github.com/#{repo}.git" }
+
+ruby IO.read('.ruby-version').strip
+
+gem 'sinatra'
+gem 'sinatra-cors'
+gem 'sinatra-contrib'
+gem 'sinatra-activerecord'
+
+gem 'pg'
+gem 'activerecord'
+
+gem 'rake'
+
+gem 'puma'
+
+group :development do
+  gem 'pry-byebug'
+end
