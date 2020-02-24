@@ -704,13 +704,6 @@ var RevealTracking = window.RevealTracking || (function () {
   }
 
   /**
-   * Get all quiz names.
-   */
-  function _getQuizzes() {
-    return Array.from(document.querySelectorAll('[data-quiz]')).map(quizScript => quizScript.dataset.quiz);
-  }
-
-  /**
    * Get all media
    */
   function _getMedia() {
