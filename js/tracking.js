@@ -225,7 +225,7 @@ var RevealTracking = window.RevealTracking || (function () {
       consentBanner.querySelector(`.${cbConfig.consentButton.class}`).addEventListener('click', function() {
         consentBanner.remove();
         consentGiven = true;
-        _requestUserToken();
+        _requestUserToken().catch(err => console.error(err));
       });
 
       // add consent banner to DOM
