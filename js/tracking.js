@@ -201,7 +201,7 @@ var RevealTracking = window.RevealTracking || (function () {
    */
   function showConsentBanner() {
     if (userToken == undefined && config.consentBanner != false) {
-      _loadStylesheet(document.currentScript.src + '/../../css/tracking.css');
+      _loadStylesheet();
       let cbConfig = config.consentBanner;
 
       // create consent banner node
@@ -265,7 +265,16 @@ var RevealTracking = window.RevealTracking || (function () {
   /**
    * Load consent banner stylesheet.
    */
-  function _loadStylesheet(path) {
+  function _loadStylesheet() {
+    let script;
+    if (document.currentScript) {
+      script = document.currentScript;
+    } else {
+      script = document.querySelector('script[src$="/tracking.js"]');
+    }
+    if (script) {
+      path = script.src.replace(/js/g, 'css');
+    }
     let link  = window.document.createElement('link');
     link.rel  = 'stylesheet';
     link.type = 'text/css';
