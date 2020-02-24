@@ -257,6 +257,15 @@ var RevealTracking = window.RevealTracking || (function () {
     _trackQuizzes();
   }
 
+  /**
+   * Adds metadata, such as the presentation's URL and its total number of slides.
+   */
+  function addMetadata() {
+    // remove the hash parameters (from reveal.js)
+    postBody.presentationUrl = window.location.href.replace(/(#(.+)?)/, '');
+    postBody.totalNumberOfSlides = Reveal.getTotalSlides();
+  }
+
   // Consent Banner: helper functions
 
   /**
@@ -634,7 +643,7 @@ var RevealTracking = window.RevealTracking || (function () {
    *   userToken: string,
    *   presentationUrl: string,
    *   numberOfTotalSlides: integer,
-   *   finalProgress: float,
+   *   finalProgress: float|integer,
    *   totalDwellTime: string,
    *   dwellTimes: Array,
    *   timeline: Array
@@ -647,11 +656,6 @@ var RevealTracking = window.RevealTracking || (function () {
       } else {
         console.warn('No user token is given.');
       }
-
-      // add lecture metadata: url and total number of slides
-      // remove the hash parameters (from reveal.js)
-      postBody.presentationUrl = window.location.href.replace(/(#(.+)?)/, '');
-      postBody.totalNumberOfSlides = Reveal.getTotalSlides();
 
       // transmit tracking data
       navigator.sendBeacon(config.apiConfig.trackingAPI, JSON.stringify(postBody));
@@ -786,9 +790,11 @@ var RevealTracking = window.RevealTracking || (function () {
 
       if (Reveal.isReady()) {
         startTimers();
+        addMetadata();
       } else {
         Reveal.addEventListener('ready', function() {
           startTimers();
+          addMetadata();
         });
       }
     },
