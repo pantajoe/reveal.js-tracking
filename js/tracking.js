@@ -363,7 +363,7 @@ var RevealTracking = window.RevealTracking || (function () {
     window.addEventListener('unload', function() {
       if (_tracksDwellTimePerSlide()) {
         _track('dwellTimePerSlide', {
-          dwellTime: globalTimer.toString(),
+          dwellTime: slideTimer.toString(),
         });
       }
 
