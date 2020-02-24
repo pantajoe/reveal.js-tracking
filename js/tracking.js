@@ -387,17 +387,22 @@ var RevealTracking = window.RevealTracking || (function () {
   function _trackLinks() {
     if (_tracksInternalLinks() || _tracksExternalLinks()) {
       document.addEventListener('click', function(event) {
-        if (!event.target.matches(`#${Reveal.getCurrentSlide().id} a`)) return true;
+        if (!Array.from(Reveal.getCurrentSlide().querySelectorAll('a')).includes(event.target)) return true;
+        let baseURL = window.location.href.replace((new RegExp(window.location.hash) || ''), '');
+        let path = event.target.href.replace(baseURL, '');
 
-        let isInternalLink = event.target.href.startsWith('#');
+        if (path == '#') return true;
+
+        let isInternalLink = path.startsWith('#');
 
         if ((isInternalLink && _tracksInternalLinks()) || (!isInternalLink && _tracksExternalLinks())) {
           let linkType = isInternalLink ? 'internalLink' : 'externalLink';
+          let href     = isInternalLink ? path           : event.target.href
 
           _track(linkType, {
             timestamp: globalTimer.toString(),
             metadata: {
-              href: event.target.href,
+              href: href,
               linkText: event.target.text,
             },
           });
