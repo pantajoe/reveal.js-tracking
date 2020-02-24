@@ -304,7 +304,7 @@ var RevealTracking = window.RevealTracking || (function () {
 
       return data.valid;
     } catch(err) {
-      console.warn(err);
+      console.error(err);
       return false;
     }
   }
