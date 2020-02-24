@@ -654,7 +654,7 @@ var RevealTracking = window.RevealTracking || (function () {
       postBody.totalNumberOfSlides = Reveal.getTotalSlides();
 
       // transmit tracking data
-      navigator.sendBeacon(config.api.apiConfig.trackingAPI, JSON.stringify(postBody));
+      navigator.sendBeacon(config.apiConfig.trackingAPI, JSON.stringify(postBody));
     } else {
       console.warn('The user has not accepted to being tracked. No tracking data will be sent.');
     }
