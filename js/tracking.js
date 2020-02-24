@@ -649,7 +649,8 @@ var RevealTracking = window.RevealTracking || (function () {
       }
 
       // add lecture metadata: url and total number of slides
-      postBody.presentationUrl = window.location.href;
+      // remove the hash parameters (from reveal.js)
+      postBody.presentationUrl = window.location.href.replace(/(#(.+)?)/, '');
       postBody.totalNumberOfSlides = Reveal.getTotalSlides();
 
       // transmit tracking data
