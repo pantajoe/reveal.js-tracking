@@ -416,33 +416,44 @@ var RevealTracking = window.RevealTracking || (function () {
    */
   function _trackMediaActions() {
     if (_tracksAudio() || _tracksVideo()) {
-      _getMedia().forEach(function(media) {
-        let mediaType = media.tagName.toLowerCase();
+      function trackMediaEvents() {
+        _getMedia().forEach(function(media) {
+          let mediaType = media.tagName.toLowerCase();
 
-        media.addEventListener('play', function () {
-          _track(mediaType, {
-            mediaEvent: 'play',
-            timestamp: eventData.playedAt || globalTimer.toString(),
-            metadata: {
-              id: this.id,
-              mediaSource: this.currentSrc,
-            },
-          });
-        });
+          if (!media.onplay) {
+            media.onplay = function () {
+              _track(mediaType, {
+                mediaEvent: 'play',
+                timestamp: globalTimer.toString(),
+                metadata: {
+                  id: this.id,
+                  mediaSource: this.currentSrc,
+                },
+              });
+            };
+          }
 
-        media.addEventListener('pause', function () {
-          _track(mediaType, {
-            mediaEvent: 'pause',
-            finished: this.ended,
-            progress: this.currentTime / this.duration,
-            timestamp: globalTimer.toString(),
-            metadata: {
-              id: this.id,
-              mediaSource: this.currentSrc,
-            },
-          });
+          if (!media.onpause) {
+            media.onpause = function () {
+              _track(mediaType, {
+                mediaEvent: 'pause',
+                finished: this.ended,
+                progress: this.currentTime / this.duration,
+                timestamp: globalTimer.toString(),
+                metadata: {
+                  id: this.id,
+                  mediaSource: this.currentSrc,
+                },
+              });
+            };
+          }
         });
-      });
+      }
+
+      Reveal.addEventListener('ready',          trackMediaEvents);
+      Reveal.addEventListener('fragmentshown',  trackMediaEvents);
+      Reveal.addEventListener('fragmenthidden', trackMediaEvents);
+      Reveal.addEventListener('slidechanged',   trackMediaEvents);
     }
   }
 
