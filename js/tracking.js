@@ -360,7 +360,7 @@ var RevealTracking = window.RevealTracking || (function () {
    * Also send data to trackingAPI.
    */
   function _trackClosing() {
-    window.addEventListener('pagehide', function() {
+    window.addEventListener('unload', function() {
       if (_tracksDwellTimePerSlide()) {
         _track('dwellTimePerSlide', {
           dwellTime: globalTimer.toString(),
