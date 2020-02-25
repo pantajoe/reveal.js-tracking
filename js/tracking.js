@@ -17,10 +17,14 @@ class Timer {
   }
 
   start() {
-    let self = this;
-    this.timer = setInterval(() => {
-      self._incrementSecond();
-    }, 1000);
+    if (this.timer) {
+      console.log('The timer is already running.');
+    } else {
+      let self = this;
+      this.timer = setInterval(() => {
+        self._incrementSecond();
+      }, 1000);
+    }
   }
 
   reset() {
@@ -31,6 +35,7 @@ class Timer {
   clear() {
     if (this.timer) {
       clearInterval(this.timer);
+      delete this.timer;
     }
     this.hours   = 0;
     this.minutes = 0;
