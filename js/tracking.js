@@ -406,7 +406,7 @@ var RevealTracking = window.RevealTracking || (function () {
 
         if ((isInternalLink && _tracksInternalLinks()) || (!isInternalLink && _tracksExternalLinks())) {
           let linkType = isInternalLink ? 'internalLink' : 'externalLink';
-          let href     = isInternalLink ? path           : event.target.href
+          let href     = isInternalLink ? path           : event.target.href;
 
           _track(linkType, {
             timestamp: globalTimer.toString(),
@@ -500,7 +500,6 @@ var RevealTracking = window.RevealTracking || (function () {
         let quiz = window[quizName];
         if (!quiz) return true;
 
-        quizTimer = new Timer();
         quizTimer.start();
 
         let quizMetadata = {
