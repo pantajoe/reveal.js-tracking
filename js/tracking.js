@@ -188,11 +188,14 @@ var RevealTracking = window.RevealTracking || (function () {
   async function loadUserToken() {
     userToken = _getCookie('user_token') || window.localStorage.getItem('user_token');
 
-    let isValid = await _userTokenIsValid();
-    consentGiven = true;
+    if (userToken) {
+      let isValid = await _userTokenIsValid();
+      
+      if (!isValid) {
+        await _requestUserToken();
+      }
 
-    if (!isValid) {
-      await _requestUserToken();
+      if (userToken) consentGiven = true;
     }
   }
 
