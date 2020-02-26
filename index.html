@@ -29,8 +29,8 @@
 
             - slide transitions
             - dwell times (per slide and total)
-            - clicking on links (pointing to *internal* slides and *external* webpages)
-            - interacting with media (audio recordings and videos)
+            - clicking on links (pointing to *internal* slides or *external* webpages)
+            - playing and pausing with media (audio recordings and videos)
             - performing quizzes
             - with timestamps!
           </textarea>
@@ -41,7 +41,7 @@
             ## 2. Slide transitions
 
             - when navigating to another slide, the transition is tracked
-            - the origin and destination slides are saved in the timeline
+            - details about origin and destination slide are saved in the create slide transition event
           </textarea>
         </section>
 
@@ -49,7 +49,7 @@
           <textarea data-template>
             ## 3. Dwell times
 
-            - dwell times per slide are tracked
+            - dwell times per slide are tracked when a slide transition takes place
             - the slide timer is read for the previous slide and is restarted for the new and current slide
           </textarea>
         </section>
@@ -76,7 +76,7 @@
             <textarea data-template>
               ### 4.2. External links
 
-              - not only internal links (pointing to other slides in the presentation) are clicked
+              - not only internal links (pointing to other slides in the presentation) are tracked
               - external links like <a href="https://www.solaresearch.org/about/what-is-learning-analytics/" target="_blank">this</a> are too!
             </textarea>
           </section>
@@ -88,7 +88,7 @@
               ## 5. Media
   
               - media can be embedded in such presentations
-              - not only static images, but videos and audio recordings, too
+              - not only static images, but also videos and audio recordings
               - they can assist the understanding of the students
             </textarea>
           </section>
@@ -127,7 +127,7 @@
               ## 6. Quizzes
   
               - with the help of the <a href="https://gitlab.com/schaepermeier/reveal.js-quiz" target="_blank">reveal.js-quiz</a> Plug-in, quizzes can be embedded in reveal.js presentations!
-              - on the next slide, there is a quiz you can do
+              - on the next slide, there is a quiz you can do (copied from the <a href="https://github.com/jewlofthelotus/SlickQuiz/blob/7ee4c24ee55bdf50bd481412ad08c74d43c2d7a4/js/slickQuiz-config.js" target="_blank">slickQuiz repository</a>)
               - starting and completing it will be tracked (including your score, so you might as well try!)
             </textarea>
           </section>
