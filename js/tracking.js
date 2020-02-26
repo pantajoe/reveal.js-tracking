@@ -63,10 +63,6 @@ class Timer {
   }
 };
 
-var globalTimer = new Timer(),
-    slideTimer  = new Timer(),
-    quizTimer   = new Timer();
-
 /**
  * Tracking plug-in for reveal.js
  */
@@ -147,6 +143,10 @@ var RevealTracking = window.RevealTracking || (function () {
   var postBody = { timeline: [] };
   var consentGiven = false;
   var userToken;
+
+  var globalTimer = new Timer(),
+      slideTimer  = new Timer();
+  var quizTimers  = {};
 
   /** 
    * Validate API configuration for tracking plug-in.
@@ -508,7 +508,12 @@ var RevealTracking = window.RevealTracking || (function () {
         let quiz = window[quizName];
         if (!quiz) return true;
 
-        quizTimer.start();
+        if (quizTimers[quizName] instanceof Timer) {
+          quizTimers[quizName].reset();
+        } else {
+          quizTimers[quizName] = new Timer();
+          quizTimers[quizName].start();
+        }
 
         let quizMetadata = {
           id: quizName,
@@ -531,8 +536,11 @@ var RevealTracking = window.RevealTracking || (function () {
         let quiz = window[quizName];
         if (!quiz) return true;
 
-        let dwellTime = quizTimer.toString();
-        quizTimer.clear();
+        let dwellTime;
+        if (quizTimers[quizName] instanceof Timer) {
+          dwellTime = quizTimers[quizName].toString();
+          quizTimers[quizName].clear();
+        }
 
         let quizMetadata = {
           id: quizName,
