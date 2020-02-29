@@ -796,6 +796,7 @@ const RevealTracking = window.RevealTracking || (function () {
 
   // Return plug-in object
   return {
+    VERSION: '1.0.0',
     init: function() {
       // Register event listeners for tracking
       addEventListeners();
