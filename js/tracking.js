@@ -66,7 +66,7 @@ class Timer {
 /**
  * Tracking plug-in for reveal.js
  */
-var RevealTracking = window.RevealTracking || (function () {
+const RevealTracking = window.RevealTracking || (function () {
   /**
    * apiConfig: {
    *   authenticationAPI: {
@@ -111,7 +111,7 @@ var RevealTracking = window.RevealTracking || (function () {
    *   otherPluginInTheFuture: true,
    * },
    */
-  var defaultConfig = {
+  const defaultConfig = {
     apiConfig: {},
     consentBanner: {
       closeButton: {
@@ -138,15 +138,15 @@ var RevealTracking = window.RevealTracking || (function () {
   };
 
   // overwrite default config with manual config
-  var config = {...defaultConfig, ...Reveal.getConfig().tracking};
+  const config = {...defaultConfig, ...Reveal.getConfig().tracking};
   // this object is sent to the trackingAPI on window#unload
-  var postBody = { timeline: [] };
-  var consentGiven = false;
-  var userToken;
+  let postBody = { timeline: [] };
+  let consentGiven = false;
+  let userToken;
 
-  var globalTimer = new Timer(),
+  let globalTimer = new Timer(),
       slideTimer  = new Timer();
-  var quizTimers  = {};
+  let quizTimers  = {};
 
   /** 
    * Validate API configuration for tracking plug-in.
