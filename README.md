@@ -40,9 +40,10 @@ To view the demo of this plug-in, make sure you have Docker,
 [docker-compose](https://github.com/docker/compose/releases), and
 [grunt](https://gruntjs.com/getting-started) installed.
 
-0. Install project dependencies with `npm install`
-1. Build the containers with `docker-compose build`
-2. And then fire up the API and the demo presentation with `docker-compose up`
+1. Install project dependencies with `npm install`
+2. Build the containers with `docker-compose build`
+3. And then fire up the API and the demo presentation with `docker-compose up`
+4. Setup the database with `docker-compose run web rake db:create` and `docker-compose run web rake db:migrate`
 
 On `http://localhost:8000`, you can enjoy the demo presentation.
 
