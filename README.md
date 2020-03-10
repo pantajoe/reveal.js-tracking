@@ -36,10 +36,12 @@ events) and send them to Google Analytics, try the plug-in
 
 ## Demo
 
-To view the demo of this plug-in, make sure you have Docker and docker-compose
-installed.
+To view the demo of this plug-in, make sure you have Docker,
+[docker-compose](https://github.com/docker/compose/releases), and
+[grunt](https://gruntjs.com/getting-started) installed.
 
-1. Build the containers first with `docker-compose build`
+0. Install project dependencies with `npm install`
+1. Build the containers with `docker-compose build`
 2. And then fire up the API and the demo presentation with `docker-compose up`
 
 On `http://localhost:8000`, you can enjoy the demo presentation.
